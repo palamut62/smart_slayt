@@ -1,0 +1,51 @@
+[
+  { "type":"cover", "title":"CLAUDE'DA *1 HAFTADA* NASIL _USTALASIRSIN?_",
+    "subtitle":"9 ADIM · TEKNIK BILGI GEREKTIRMEZ · KODLAMA YOK" },
+
+  { "type":"step", "step":"ADIM 02", "bignum":"02", "page":"3/10",
+    "title":"_Gercek_ Modu Sec",
+    "blocks":[
+      { "type":"grid", "cards":[
+        { "label":"GEC", "icon":"💬", "title":"Chat", "desc":"Yil kac diye sormak icin ideal. Ama uretim burada yapilmaz." },
+        { "label":"HAFIF ISLER", "icon":"📁", "title":"Projects", "desc":"Tarayici tabanlidir. Basit ve tekrar eden isler icin uygundur." },
+        { "label":"DOSYA ISLERI", "icon":"🗂️", "title":"Cowork", "desc":"Masaustu uygulamasidir. Dosyalarla derin calismak icin iyidir." },
+        { "label":"ASIL OLAN", "icon":"⚡", "title":"Claude Code", "desc":"Yetenekler, plugin'ler, MCP'ler, otomasyonlar. _Asil oyun burada._", "highlight":true }
+      ]}
+    ],
+    "callout":"Herkes Chat mi Projects mi diye tartisiyor. _Gercek kullanicilar aylar once Claude Code'a gecti bile._" },
+
+  { "type":"step", "step":"ADIM 06", "bignum":"06", "page":"7/10",
+    "title":"Tek Bir _Plugin Sec_",
+    "intro":"Plugin store'da yuzlerce secenek var. Hepsini kurma. Her hafta yaptigin ise en cok uyan bir tanesini sec.",
+    "blocks":[
+      { "type":"iconrows", "rows":[
+        { "icon":"📣", "title":"Content Creators", "sub":"brand-voice + /script + /carousel" },
+        { "icon":"💼", "title":"Business Owners", "sub":"/inbox-zero + /accounting + /onboard" },
+        { "icon":"📊", "title":"Data People", "sub":"/dashboard-builder + business-dashboard" }
+      ]}
+    ],
+    "callout":"Gercekten kullandigin 1 plugin, kullanmadigin 50 plugin'den daha degerlidir. _Once birinde ustalas. Sonra yenilerini ekle._" },
+
+  { "type":"step", "step":"ADIM 07", "bignum":"07", "page":"8/10",
+    "title":"Araclarini *MCP'lerle* _Bagla_",
+    "blocks":[
+      { "type":"code", "text":"claude code -> /mcp -> add" },
+      { "type":"bullets", "items":[
+        "MCP'ler, Claude Code'un uygulamalarina ulasmasini saglar — Slack, Gmail, Notion, Stripe, Drive. Tek komut, gercek aksiyon.",
+        "\"Gecen haftaki Stripe gelirini cek ve #wins kanalina gonder.\" 4 saniyede tamam.",
+        "Sekmeler arasinda kopyala-yapistir yapmayi birak. Gercek isi Claude yapsin."
+      ]}
+    ],
+    "callout":"MCP olmadan Claude, zeki bir yabanci gibidir. _MCP'lerle birlikte ise senin COO'undur._" },
+
+  { "type":"step", "step":"ADIM 08", "bignum":"08", "page":"9/10",
+    "title":"Al'imi _Yoneten_ Iki Dosya",
+    "intro":"Bunlari Claude Code projenin icine ekle. Birlikte *50 prompt'tan* daha fazla is gorurler.",
+    "blocks":[
+      { "type":"filecards", "cards":[
+        { "icon":"👤", "file":"CLAUDE.md", "desc":"Sen kimsin. Ne yapiyorsun. Kime satis yapiyorsun. Benim dosyam 200 satir; Claude bunu her oturumda okur." },
+        { "icon":"🚫", "file":"anti-style.md", "desc":"Claude'un asla kullanmamasi gereken tum ifadeler burada.", "tagsLabel":"Yasaklilar:", "tags":["delve","boundaries","dive into","elevate"] }
+      ]}
+    ],
+    "callout":"Iceriye 30 rastgele dokuman yigma. _Iki guclu dosya, elli vasat dosyadan iyidir._" }
+]

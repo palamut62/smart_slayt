@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>smart slayt · bilgi karti studyosu</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<script>document.documentElement.dataset.theme=localStorage.getItem('theme')||'light';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Archivo:wght@400;500;600;700;800&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFE3D2; --paper2:#E7D8C2; --ink:#241E18; --ink-soft:#5b4f42;
+    --rust:#B5482E; --rust-deep:#8f3520; --gold:#C98A3A; --line:#d8c5aa;
+    --card:#F8F1E6; --shadow:0 18px 40px -20px rgba(60,35,20,.45);
+    --sidebar:#241E18; --field:#fffdf9;
+  }
+  /* KOYU TEMA (uygulama arayuzu) */
+  html[data-theme="dark"]{
+    --paper:#15120e; --paper2:#1d1812; --ink:#F1E8DB; --ink-soft:#a99a86;
+    --rust:#E0653F; --rust-deep:#c0512e; --line:#382f25;
+    --card:#221c15; --field:#2a2219; --sidebar:#100d0a;
+    --shadow:0 18px 40px -20px rgba(0,0,0,.6);
+  }
+  html[data-theme="dark"] body{background-image:radial-gradient(circle at 12% 10%,#1e1812 0,transparent 45%),radial-gradient(circle at 88% 90%,#241b12 0,transparent 50%);}
+  html[data-theme="dark"] body::after{opacity:.18;}
+  html[data-theme="dark"] #toast{background:#2a2219;}
+  html[data-theme="dark"] .pal{background:var(--field);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Archivo',sans-serif;color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(circle at 12% 10%,#f3e8d7 0,transparent 45%),radial-gradient(circle at 88% 90%,#e6d3b9 0,transparent 50%);
+    min-height:100vh;display:flex;
+  }
+  /* grain */
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.35;z-index:1;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");}
+
+  /* SIDEBAR */
+  aside{position:sticky;top:0;height:100vh;width:264px;flex:none;background:var(--sidebar);color:#f3e7d6;
+    display:flex;flex-direction:column;padding:34px 26px;z-index:5;}
+  .brand{font-family:'Fraunces',serif;font-weight:600;font-size:30px;line-height:1.0;letter-spacing:-.5px;}
+  .brand .dot{color:var(--rust);}
+  .brand small{display:block;font-family:'Archivo';font-weight:600;font-size:11px;letter-spacing:4px;color:#b6a489;margin-top:8px;text-transform:uppercase;}
+  nav.menu{margin-top:46px;display:flex;flex-direction:column;gap:6px;}
+  nav.menu button{display:flex;align-items:center;gap:14px;background:none;border:none;color:#cdbca6;font-family:'Archivo';
+    font-size:16px;font-weight:600;text-align:left;padding:13px 16px;border-radius:12px;cursor:pointer;transition:.18s;}
+  nav.menu button:hover{background:#332a22;color:#fff;}
+  nav.menu button.active{background:var(--rust);color:#fff;}
+  nav.menu button .ic{font-size:19px;width:22px;text-align:center;}
+  aside .foot{margin-top:auto;font-size:12px;color:#8d7c68;line-height:1.5;}
+  .topctrl{position:fixed;top:16px;right:22px;z-index:40;display:flex;align-items:center;gap:8px;}
+  .topctrl .lng{background:none;border:none;color:var(--ink-soft);font-family:'Archivo';font-size:13px;font-weight:800;
+    letter-spacing:1px;cursor:pointer;opacity:.55;transition:.15s;padding:2px;line-height:1;}
+  .topctrl .lng:hover{opacity:1;color:var(--ink);}
+  .topctrl .lng.active{opacity:1;color:var(--rust);}
+  .topctrl .lngsep{color:var(--ink-soft);opacity:.4;font-size:13px;}
+  .theme-fab{width:auto;height:auto;border-radius:0;background:none;border:none;color:var(--ink-soft);font-size:17px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;box-shadow:none;transition:.18s;opacity:.6;padding:2px 4px;line-height:1;margin-left:2px;}
+  .theme-fab:hover{opacity:1;color:var(--rust);transform:rotate(-12deg);}
+  aside .keychip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;padding:6px 11px;border-radius:20px;margin-top:14px;}
+  .keychip.on{background:#27432a;color:#8fe09a;} .keychip.off{background:#46261f;color:#f0a08a;}
+
+  /* MAIN */
+  main{flex:1;min-width:0;position:relative;z-index:2;padding:40px 56px 24px;max-width:1180px;margin:0 auto;}
+  .view{display:none;animation:rise .5s ease both;} .view.active{display:block;}
+  @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:5px;color:var(--rust);text-transform:uppercase;}
+  h1.title{font-family:'Fraunces',serif;font-weight:600;font-size:54px;line-height:1.02;letter-spacing:-1px;margin:8px 0 6px;}
+  h1.title em{font-style:italic;color:var(--rust);}
+  .lead{font-size:17px;color:var(--ink-soft);max-width:560px;line-height:1.5;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:34px;margin-top:30px;}
+  .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;margin-top:26px;}
+  .sgrid .panel{margin-top:0;max-width:none;padding:28px;}
+  .sgrid .panel h3{font-family:'Fraunces',serif;font-size:22px;margin:0;}
+  @media(max-width:1000px){.sgrid{grid-template-columns:1fr;}}
+  /* Ayarlar kompakt — scroll cikmasin */
+  #view-settings h1.title{font-size:36px;margin:4px 0 2px;}
+  #view-settings .lead{margin-bottom:0;font-size:15px;}
+  #view-settings .sgrid{gap:14px;margin-top:14px;}
+  #view-settings .sgrid .panel{padding:18px 20px;}
+  #view-settings .panel .field{margin-top:12px;}
+  #view-settings .panel h3{font-size:20px;}
+  #view-settings .row{margin-top:16px !important;}
+  #view-settings .pals .sw{width:54px;height:40px;}
+  #view-settings .hint{font-size:12px;}
+  label{display:block;font-weight:700;font-size:13px;letter-spacing:.5px;margin:0 0 9px;color:var(--ink-soft);text-transform:uppercase;}
+  input,select{width:100%;padding:15px 17px;border:1.5px solid var(--line);border-radius:13px;font-size:16px;font-family:'Archivo';
+    background:var(--field);transition:.15s;color:var(--ink);}
+  input:focus,select:focus{outline:none;border-color:var(--rust);box-shadow:0 0 0 4px rgba(181,72,46,.13);}
+  .panel .field{margin-top:18px;}
+  .panel .field:first-child{margin-top:0;}
+  .grid2{display:grid;grid-template-columns:1fr 150px;gap:18px;align-items:end;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--rust);color:#fff;border:none;
+    padding:15px 26px;border-radius:13px;font-family:'Archivo';font-size:16px;font-weight:700;cursor:pointer;transition:.18s;box-shadow:0 8px 18px -8px var(--rust);}
+  .btn:hover{background:var(--rust-deep);transform:translateY(-1px);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  .btn.ghost{background:var(--paper2);color:var(--ink);box-shadow:none;border:1px solid var(--line);}
+  .btn.ghost:hover{background:var(--line);}
+  .btn.sm{padding:10px 16px;font-size:14px;border-radius:10px;}
+  .btn.dark{background:var(--ink);box-shadow:none;} .btn.dark:hover{background:#3a3026;}
+  .row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+  .pals{display:flex;gap:12px;flex-wrap:wrap;}
+  .pal{cursor:pointer;border:2px solid transparent;border-radius:13px;padding:5px;transition:.15s;background:#fff;}
+  .pal:hover{transform:translateY(-2px);}
+  .pal.sel{border-color:var(--rust);}
+  .pal .sw{width:62px;height:46px;border-radius:8px;position:relative;overflow:hidden;border:1px solid var(--line);}
+  .pal .sw .acc{position:absolute;right:6px;bottom:6px;width:18px;height:18px;border-radius:50%;}
+  .pal .nm{display:block;text-align:center;font-size:11px;font-weight:700;color:var(--ink-soft);margin-top:5px;text-transform:capitalize;}
+  .hint{font-size:14px;color:var(--ink-soft);margin-top:14px;line-height:1.5;}
+  code{font-family:'Roboto Mono',monospace;background:#efe2cd;padding:1px 7px;border-radius:6px;font-size:13px;color:var(--rust);}
+
+  /* card grid (results & set detail) */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px;margin-top:24px;}
+  .thumb{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);
+    aspect-ratio:4/5;animation:pop .45s ease both;}
+  @keyframes pop{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:none;}}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;}
+  .thumb .dl{position:absolute;right:9px;bottom:9px;background:rgba(20,16,12,.82);color:#fff;border:none;width:38px;height:38px;
+    border-radius:10px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;opacity:0;}
+  .thumb:hover .dl{opacity:1;} .thumb .dl:hover{background:var(--rust);}
+  .thumb .idx{position:absolute;left:9px;top:9px;background:rgba(255,255,255,.9);color:var(--ink);font-size:12px;font-weight:800;padding:3px 9px;border-radius:8px;}
+
+  /* CAROUSEL (sosyal medya gonderisi gibi) */
+  .carousel{margin-top:30px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+  .stage{display:flex;align-items:center;gap:18px;width:100%;justify-content:center;}
+  .viewport{width:380px;max-width:78vw;aspect-ratio:4/5;border-radius:20px;overflow:hidden;border:1px solid var(--line);
+    box-shadow:0 26px 60px -24px rgba(60,35,20,.6);background:#fff;position:relative;}
+  .track{display:flex;height:100%;transition:transform .4s cubic-bezier(.22,1,.36,1);}
+  .track .slide{flex:0 0 100%;height:100%;}
+  .track .slide img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;}
+  .cnav{flex:none;width:54px;height:54px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);
+    font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;box-shadow:var(--shadow);user-select:none;}
+  .cnav:hover{background:var(--rust);color:#fff;border-color:var(--rust);transform:scale(1.06);}
+  .cnav:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+  .dots{display:flex;gap:9px;align-items:center;}
+  .dots .dot{width:9px;height:9px;border-radius:50%;background:#cdb89a;cursor:pointer;transition:.25s;}
+  .dots .dot.active{background:var(--rust);width:26px;border-radius:6px;}
+  .counter{font-size:13px;font-weight:700;color:var(--ink-soft);letter-spacing:1px;}
+  .carousel .tools{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+  @media(max-width:620px){.cnav{width:44px;height:44px;font-size:22px;}}
+
+  /* library list */
+  .setlist{display:grid;grid-template-columns:1fr;gap:18px;margin-top:26px;}
+  .setcard{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px;
+    display:flex;gap:20px;align-items:center;transition:.18s;}
+  .setcard:hover{transform:translateY(-2px);border-color:#c9a87f;}
+  .setcard .strip{display:flex;gap:6px;flex:none;}
+  .setcard .strip img{width:50px;height:62px;object-fit:cover;border-radius:7px;border:1px solid var(--line);}
+  .setcard .meta{flex:1;min-width:0;}
+  .setcard .meta h3{font-family:'Fraunces',serif;font-weight:600;font-size:22px;line-height:1.15;margin-bottom:5px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .setcard .meta .sub{font-size:13px;color:var(--ink-soft);}
+  .setcard .meta .sub b{color:var(--rust);}
+  .setcard .acts{display:flex;gap:10px;flex:none;align-items:center;}
+  .abtn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:11px;border:1.5px solid var(--line);
+    background:var(--field);color:var(--ink);cursor:pointer;font-family:'Archivo';font-size:14px;font-weight:700;transition:.16s;white-space:nowrap;}
+  .abtn .i{font-size:16px;line-height:1;}
+  .abtn:hover{transform:translateY(-1px);box-shadow:0 8px 16px -8px rgba(60,35,20,.4);}
+  .abtn.open{background:var(--rust);color:#fff;border-color:var(--rust);}
+  .abtn.open:hover{background:var(--rust-deep);}
+  .abtn.zip:hover{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .abtn.del{color:#a23b2a;border-color:#e3bcb0;}
+  .abtn.del:hover{background:#b03326;color:#fff;border-color:#b03326;}
+  @media(max-width:720px){.abtn .t{display:none;} .abtn{padding:0 13px;}}
+
+  .empty{text-align:center;padding:70px 20px;color:var(--ink-soft);}
+  .empty .big{font-size:54px;margin-bottom:14px;}
+
+  /* lightbox */
+  .lb{position:fixed;inset:0;background:rgba(28,20,14,.86);backdrop-filter:blur(4px);z-index:50;display:none;
+    align-items:center;justify-content:center;padding:30px;}
+  .lb.show{display:flex;animation:fade .25s;} @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .lb img{max-height:90vh;max-width:90vw;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.6);}
+  .lb .x{position:absolute;top:22px;right:26px;color:#fff;font-size:34px;cursor:pointer;background:none;border:none;}
+
+  /* progress overlay */
+  .working{display:none;flex-direction:column;align-items:center;gap:18px;padding:50px;text-align:center;}
+  .working.show{display:flex;}
+  .loader{width:54px;height:54px;border:5px solid #e3d3ba;border-top-color:var(--rust);border-radius:50%;animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .working p{font-family:'Fraunces',serif;font-size:20px;color:var(--ink);} .working span{font-size:14px;color:var(--ink-soft);}
+
+  /* toast */
+  #toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(150%);z-index:99;
+    background:var(--ink);color:#fff;padding:15px 24px;border-radius:14px;font-size:15px;font-weight:600;
+    box-shadow:0 14px 30px rgba(0,0,0,.3);transition:transform .35s cubic-bezier(.2,1.2,.3,1),opacity .25s;max-width:90vw;
+    opacity:0;pointer-events:none;}
+  #toast.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto;}
+  #toast.ok{background:#27432a;} #toast.err{background:var(--rust-deep);}
+  .status{font-size:14px;margin-top:12px;font-weight:600;} .status.ok{color:#2e7d32;} .status.err{color:var(--rust);}
+
+  /* modal confirm (native dialog YOK) */
+  .modal{position:fixed;inset:0;background:rgba(28,20,14,.55);z-index:60;display:none;align-items:center;justify-content:center;}
+  .modal.show{display:flex;animation:fade .2s;}
+  .modal .box{background:var(--card);border-radius:18px;padding:30px;max-width:380px;box-shadow:var(--shadow);text-align:center;}
+  .modal h4{font-family:'Fraunces',serif;font-size:22px;margin-bottom:8px;} .modal p{color:var(--ink-soft);margin-bottom:22px;}
+  @media(max-width:760px){aside{display:none;} main{padding:28px 20px 70px;} h1.title{font-size:38px;}}
+</style>
+</head>
+<body>
+<div class="topctrl">
+  <button id="langFab" class="lng" onclick="toggleUILang()" title="Dil / Language">EN</button>
+  <button id="themeFab" class="theme-fab" onclick="toggleTheme()" title="Açik/Koyu tema">🌙</button>
+</div>
+<aside>
+  <div class="brand">smart<span class="dot">.</span>slayt<small data-i18n="brand_sub">bilgi karti studyosu</small></div>
+  <nav class="menu">
+    <button id="nav-studio" class="active" onclick="go('studio')"><span class="ic">✦</span><span data-i18n="nav_studio">Stüdyo</span></button>
+    <button id="nav-library" onclick="go('library')"><span class="ic">▤</span><span data-i18n="nav_library">Kütüphane</span></button>
+    <button id="nav-settings" onclick="go('settings')"><span class="ic">⚙</span><span data-i18n="nav_settings">Ayarlar</span></button>
+    <button id="nav-help" onclick="go('help')"><span class="ic">?</span><span data-i18n="nav_help">Yardım</span></button>
+  </nav>
+  <div class="foot">
+    <div id="keychip" class="keychip off">● anahtar yok</div>
+    <p style="margin-top:16px" data-i18n="foot_note">Web araştırmalı · 1080×1350 (4:5) bilgi kartları.</p>
+  </div>
+</aside>
+
+<main>
+  <!-- STUDYO -->
+  <section id="view-studio" class="view active">
+    <div class="eyebrow" data-i18n="studio_eyebrow">yeni seri</div>
+    <h1 class="title" data-i18n-html="studio_title">Bir konu ver, <em>akilli kart</em> serisini al.</h1>
+    <p class="lead" data-i18n="studio_lead">Konunu yaz; uygulama webden güncel verileri araştırıp ikonlu, kod bloklu ve karşılaştırmalı bilgi kartları olarak tasarlar. Şablon ve renk paletini seç, her seri otomatik kütüphanene kaydedilsin.</p>
+
+    <div class="panel">
+      <div class="field"><label data-i18n="f_topic">Konu</label>
+        <input id="topic" data-i18n-ph="ph_topic" placeholder="Ör: 2025'te yapay zeka ile pasif gelir" /></div>
+      <div class="grid2" style="grid-template-columns:1fr 1fr;margin-top:20px">
+        <div class="field" style="margin:0"><label data-i18n="f_lang">Dil</label>
+          <select id="lang">
+            <option value="tr">🇹🇷 Türkçe</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="ar">🇸🇦 العربية</option>
+          </select></div>
+        <div class="field" style="margin:0"><label data-i18n="f_steps">Adim sayisi</label>
+          <input id="steps" type="number" value="8" min="1" max="15" /></div>
+      </div>
+      <div class="field"><label data-i18n="f_template">Sablon (template)</label>
+        <div class="pals" id="tpls"></div></div>
+      <div class="field"><label data-i18n="f_palette">Renk paleti</label>
+        <div class="pals" id="pals"></div></div>
+      <label class="deeptoggle" style="display:flex;align-items:center;gap:10px;margin-top:18px;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:600;color:var(--ink)">
+        <input type="checkbox" id="deep" checked style="width:18px;height:18px;accent-color:var(--rust);cursor:pointer">
+        <span data-i18n-html="deep_label">🔬 Derin araştırma <span style="color:var(--ink-soft);font-weight:400">— her başlık için ayrı web araştırması (daha kapsamlı, biraz yavaş)</span></span>
+      </label>
+      <div class="row" style="margin-top:18px">
+        <button id="genBtn" class="btn" onclick="generate()"><span>✦</span> <span data-i18n="btn_generate">Kartlari Üret</span></button>
+        <span class="hint" style="margin:0" data-i18n="gen_hint">web arastirmali · derin modda ~1-2 dk</span>
+      </div>
+      <div id="working" class="working">
+        <div class="loader"></div>
+        <div><p data-i18n="working_title">Kartlar tasarlaniyor…</p><span id="workmsg" data-i18n="working_sub">Web arastiriliyor ve metinler yaziliyor</span></div>
+      </div>
+    </div>
+
+    <div id="result"></div>
+  </section>
+
+  <!-- KUTUPHANE -->
+  <section id="view-library" class="view">
+    <div class="eyebrow" data-i18n="lib_eyebrow">kayitli seriler</div>
+    <h1 class="title" data-i18n="lib_title">Kütüphane</h1>
+    <p class="lead" data-i18n="lib_lead">Ürettiğin her seri burada saklanir. Tek tek veya tümünü ZIP olarak indir, dilediğinde tekrar kullan.</p>
+    <div id="setlist" class="setlist"></div>
+  </section>
+
+  <!-- SERI DETAY -->
+  <section id="view-detail" class="view">
+    <button class="btn ghost sm" onclick="go('library')" data-i18n="back_library">← Kütüphane</button>
+    <h1 class="title" id="detailTitle" style="margin-top:18px"></h1>
+    <p class="lead" id="detailSub"></p>
+    <div id="detailCards"></div>
+  </section>
+
+  <!-- AYARLAR -->
+  <section id="view-settings" class="view">
+    <div class="eyebrow" data-i18n="set_eyebrow">yapilandirma</div>
+    <h1 class="title" data-i18n="set_title">Ayarlar</h1>
+    <p class="lead" data-i18n-html="set_lead">Anahtarlar yalnizca yerel <code>config.json</code> dosyasinda tutulur.</p>
+    <div class="sgrid">
+    <div class="panel" style="grid-column:1/-1">
+      <h3 style="margin-bottom:4px" data-i18n="prov_title">Sağlayıcı</h3>
+      <p class="hint" style="margin-top:0" data-i18n-html="prov_hint">İçerik üreticisini seç. <b>Codex</b> yerel CLI'i (ChatGPT oturumu) kullanır, web araştırmasını kendi yapar — OpenRouter anahtarı gerekmez.</p>
+      <div class="pals" id="providerPals" style="margin-top:14px"></div>
+      <div id="codexBox" style="display:none;margin-top:16px">
+        <div class="field" style="margin:0"><label data-i18n="codex_model">Codex modeli (opsiyonel)</label>
+          <input id="codexModel" data-i18n-ph="codex_model_ph" placeholder="boş = codex varsayılanı (ör. gpt-5.3-codex)" onblur="saveProvider()" /></div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn ghost" onclick="testCodex()" data-i18n="codex_test">Codex Bağlantısını Test Et</button>
+        </div>
+        <div id="codexStatus" class="status"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin-bottom:14px">OpenRouter</h3>
+      <div class="field"><label data-i18n="or_key">OpenRouter API Anahtari</label>
+        <input id="apiKey" type="password" placeholder="sk-or-v1-..." />
+        <div id="currentKey" class="hint"></div></div>
+      <div class="field"><label data-i18n="or_content_model">İçerik modeli (kart metni)</label>
+        <select id="model">
+          <option value="deepseek/deepseek-v4-pro">DeepSeek V4 Pro (önerilen · detayli)</option>
+          <option value="deepseek/deepseek-v4-flash">DeepSeek V4 Flash (hizli · ucuz)</option>
+          <option value="anthropic/claude-sonnet-4.5">Claude Sonnet 4.5 (kaliteli)</option>
+          <option value="openai/gpt-4o">GPT-4o</option>
+          <option value="google/gemini-2.5-flash">Gemini 2.5 Flash (hizli)</option>
+        </select></div>
+      <div class="field"><label data-i18n="or_research_model">Araştırma modeli (web · token-verimli)</label>
+        <select id="researchModel">
+          <option value="perplexity/sonar">Perplexity Sonar (önerilen · web · ucuz)</option>
+          <option value="perplexity/sonar-pro">Perplexity Sonar Pro (daha güçlü)</option>
+          <option value="google/gemini-2.5-flash">Gemini 2.5 Flash (web plugin)</option>
+          <option value="openai/gpt-4o">GPT-4o (web plugin)</option>
+        </select></div>
+      <div class="row" style="margin-top:24px">
+        <button class="btn" onclick="saveSettings()" data-i18n="btn_save">Kaydet</button>
+        <button class="btn ghost" onclick="testKey()" data-i18n="btn_test_key">Anahtari Test Et</button>
+      </div>
+      <div id="setStatus" class="status"></div>
+    </div>
+
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h3>𝕏 ile Paylasim</h3>
+        <span id="xchip" class="keychip off" style="margin:0">● bagli degil</span>
+      </div>
+      <p class="hint" style="margin-top:6px" data-i18n-html="x_hint">developer.x.com'dan uygulama olustur (Read+Write), <b>OAuth 1.0a</b> anahtarlarini gir.</p>
+      <div id="xCurrent" class="hint" style="margin-top:4px"></div>
+      <div class="grid2" style="grid-template-columns:1fr 1fr">
+        <div class="field" style="margin:0"><label>API Key</label><input id="xAppKey" type="password" placeholder="..." /></div>
+        <div class="field" style="margin:0"><label>API Key Secret</label><input id="xAppSecret" type="password" placeholder="..." /></div>
+        <div class="field" style="margin-top:16px"><label>Access Token</label><input id="xAccessToken" type="password" placeholder="..." /></div>
+        <div class="field" style="margin-top:16px"><label>Access Token Secret</label><input id="xAccessSecret" type="password" placeholder="..." /></div>
+      </div>
+      <div class="row" style="margin-top:24px">
+        <button class="btn" onclick="saveX()" data-i18n="x_save">X Anahtarlarini Kaydet</button>
+        <button class="btn ghost" onclick="testX()" data-i18n="x_test">Baglantiyi Test Et</button>
+      </div>
+      <div id="xStatus" class="status"></div>
+    </div>
+
+    <div class="panel" style="grid-column:1/-1">
+      <h3 style="margin-bottom:4px" data-i18n="def_title">Varsayilanlar</h3>
+      <p class="hint" style="margin-top:0" data-i18n="def_hint">Stüdyo (ana sayfa) acildiginda bu secimler hazir gelir.</p>
+      <div class="grid2" style="grid-template-columns:1fr 120px 1fr">
+        <div class="field" style="margin:0"><label data-i18n="def_lang">Varsayilan dil</label>
+          <select id="dLang">
+            <option value="tr">🇹🇷 Türkçe</option><option value="en">🇬🇧 English</option>
+            <option value="de">🇩🇪 Deutsch</option><option value="fr">🇫🇷 Français</option>
+            <option value="es">🇪🇸 Español</option><option value="it">🇮🇹 Italiano</option>
+            <option value="ru">🇷🇺 Русский</option><option value="ar">🇸🇦 العربية</option>
+          </select></div>
+        <div class="field" style="margin:0"><label data-i18n="def_steps">Adim</label>
+          <input id="dSteps" type="number" value="8" min="1" max="15" /></div>
+        <div class="field" style="margin:0"><label data-i18n="def_template">Varsayilan sablon</label>
+          <select id="dTpl">
+            <option value="editorial">📰 Editorial</option><option value="bold">🅱️ Bold</option>
+            <option value="minimal">◻️ Minimal</option><option value="scrapbook">✂️ Scrapbook</option>
+            <option value="terminal">⌨️ Terminal</option>
+          </select></div>
+      </div>
+      <div class="field"><label data-i18n="def_palette">Varsayilan palet</label>
+        <div class="pals" id="dPals"></div></div>
+      <div class="row" style="margin-top:24px">
+        <button class="btn" onclick="saveDefaults()" data-i18n="def_save">Varsayilanlari Kaydet</button>
+      </div>
+      <div id="defStatus" class="status"></div>
+    </div>
+    </div><!-- /sgrid -->
+  </section>
+
+  <!-- YARDIM -->
+  <section id="view-help" class="view">
+    <div data-i18n-html="help_body">
+    <div class="eyebrow">kilavuz</div>
+    <h1 class="title">Yardım & <em>Kullanım</em></h1>
+    <p class="lead">smart.slayt; bir konuyu webden araştırıp 1080×1350 (4:5) bilgi kartı serisine dönüştürür. Aşağıda sağlayıcılar, modeller, özellikler ve nasıl kullanılacağı var.</p>
+
+    <div class="panel">
+      <h3 style="margin-bottom:6px">🚀 Nasıl Kullanılır</h3>
+      <ol style="margin:14px 0 0 20px;line-height:1.7;font-size:16px;color:var(--ink)">
+        <li><b>Ayarlar</b>'dan bir sağlayıcı seç (OpenRouter için API anahtarı gir; Codex için makinede <code>codex login</code> yeterli).</li>
+        <li><b>Stüdyo</b>'da bir <b>konu</b> yaz (ör. "Bun runtime kurulumu").</li>
+        <li>Dil, adım sayısı, <b>şablon</b> ve <b>renk paleti</b> seç.</li>
+        <li>İstersen <b>Derin araştırma</b>'yı aç (her başlık için ayrı web araması — daha kapsamlı, biraz yavaş).</li>
+        <li><b>Kartları Üret</b>'e bas. Üretilen seri otomatik olarak <b>Kütüphane</b>'ne kaydedilir.</li>
+        <li>Kartları tek tek veya ZIP olarak indir, ya da <code>𝕏</code>'te paylaş.</li>
+      </ol>
+    </div>
+
+    <h3 style="font-family:'Fraunces',serif;font-size:26px;margin:34px 0 0">Sağlayıcılar</h3>
+    <div class="sgrid" style="grid-template-columns:1fr 1fr">
+      <div class="panel" style="margin-top:14px">
+        <h3 style="margin-bottom:8px">🌐 OpenRouter</h3>
+        <p class="hint" style="margin-top:0">Web araştırması <b>Perplexity Sonar</b> ile yapılır, kart metinleri seçtiğin içerik modeliyle yazılır. <code>sk-or-v1-...</code> API anahtarı gerekir; kullanım başına kredi harcar.</p>
+        <p class="hint">Modeller: DeepSeek V4 Pro/Flash, Claude Sonnet 4.5, GPT-4o, Gemini 2.5 Flash. Araştırma: Perplexity Sonar / Sonar Pro.</p>
+      </div>
+      <div class="panel" style="margin-top:14px">
+        <h3 style="margin-bottom:8px">⚡ Codex CLI</h3>
+        <p class="hint" style="margin-top:0">Makinedeki <code>codex</code> CLI'ı kullanır. Web araştırmasını <b>kendisi</b> yapar (tek ajan çağrısı). Ayrı API anahtarı gerekmez — mevcut <b>ChatGPT oturumunu</b> (<code>codex login</code>) otomatik kullanır.</p>
+        <p class="hint">Model alanı boş bırakılırsa Codex'in varsayılan modeli kullanılır (ör. <code>gpt-5.3-codex</code>).</p>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:14px;border-color:var(--rust)">
+      <p class="hint" style="margin:0">⚠️ <b>Otomatik yedek:</b> Sağlayıcı <b>Codex</b> seçiliyken bağlantı/oturum yoksa veya Codex hata verirse, uygulama otomatik olarak <b>OpenRouter</b>'a geçer (anahtar tanımlıysa) ve bir uyarı gösterir. Üretim sonrası "hazır · ⚡ Codex / 🌐 OpenRouter" etiketi hangi sağlayıcının kullanıldığını belirtir.</p>
+    </div>
+
+    <h3 style="font-family:'Fraunces',serif;font-size:26px;margin:34px 0 0">Özellikler</h3>
+    <div class="panel" style="margin-top:14px">
+      <ul style="margin:0 0 0 20px;line-height:1.7;font-size:16px">
+        <li><b>5 şablon:</b> Editorial, Bold, Minimal, Scrapbook, Terminal — kartların yerleşim/tipografi derisi.</li>
+        <li><b>7 renk paleti:</b> Kraft, Forest, Midnight, Blush, Ocean, Sunset, Noir.</li>
+        <li><b>Derin araştırma:</b> her alt-başlık için ayrı web araması yapıp daha doyurucu içerik üretir.</li>
+        <li><b>Otomatik logolar:</b> bilinen marka/araçlar için gerçek logolar webden çekilip karta yerleştirilir.</li>
+        <li><b>Kütüphane:</b> her seri saklanır; carousel'de görüntüle, ZIP indir veya sil.</li>
+        <li><b>𝕏 paylaşımı:</b> seriyi tek tweet ya da thread olarak paylaş (Ayarlar'dan OAuth 1.0a anahtarları).</li>
+        <li><b>Açık/Koyu tema</b> ve 8 dil desteği (TR, EN, DE, FR, ES, IT, RU, AR).</li>
+      </ul>
+    </div>
+    </div><!-- /help_body -->
+  </section>
+</main>
+
+<div class="lb" id="lb" onclick="closeLb(event)"><button class="x">×</button><img id="lbimg" src=""/></div>
+<div class="modal" id="modal"><div class="box"><h4 id="mTitle">Emin misin?</h4><p id="mText"></p>
+  <div class="row" style="justify-content:center"><button class="btn ghost sm" onclick="closeModal()" data-i18n="cancel">Vazgeç</button>
+  <button class="btn sm" id="mOk" style="background:#b03030">Sil</button></div></div></div>
+<div id="toast"></div>
+
+<script>
+let configured=false;
+
+// ===== i18n (TR/EN arayuz dili) =====
+let UILANG=localStorage.getItem('uilang')||'tr';
+const I18N={
+ tr:{
+  brand_sub:`bilgi karti studyosu`,
+  nav_studio:`Stüdyo`, nav_library:`Kütüphane`, nav_settings:`Ayarlar`, nav_help:`Yardım`,
+  foot_note:`Web araştırmalı · 1080×1350 (4:5) bilgi kartları.`,
+  studio_eyebrow:`yeni seri`,
+  studio_title:`Bir konu ver, <em>akilli kart</em> serisini al.`,
+  studio_lead:`Konunu yaz; uygulama webden güncel verileri araştırıp ikonlu, kod bloklu ve karşılaştırmalı bilgi kartları olarak tasarlar. Şablon ve renk paletini seç, her seri otomatik kütüphanene kaydedilsin.`,
+  f_topic:`Konu`, ph_topic:`Ör: 2025'te yapay zeka ile pasif gelir`,
+  f_lang:`Dil`, f_steps:`Adim sayisi`, f_template:`Sablon (template)`, f_palette:`Renk paleti`,
+  deep_label:`🔬 Derin araştırma <span style="color:var(--ink-soft);font-weight:400">— her başlık için ayrı web araştırması (daha kapsamlı, biraz yavaş)</span>`,
+  btn_generate:`Kartlari Üret`, gen_hint:`web arastirmali · derin modda ~1-2 dk`,
+  working_title:`Kartlar tasarlaniyor…`, working_sub:`Web arastiriliyor ve metinler yaziliyor`,
+  lib_eyebrow:`kayitli seriler`, lib_title:`Kütüphane`,
+  lib_lead:`Ürettiğin her seri burada saklanir. Tek tek veya tümünü ZIP olarak indir, dilediğinde tekrar kullan.`,
+  back_library:`← Kütüphane`,
+  set_eyebrow:`yapilandirma`, set_title:`Ayarlar`,
+  set_lead:`Anahtarlar yalnizca yerel <code>config.json</code> dosyasinda tutulur.`,
+  prov_title:`Sağlayıcı`,
+  prov_hint:`İçerik üreticisini seç. <b>Codex</b> yerel CLI'i (ChatGPT oturumu) kullanır, web araştırmasını kendi yapar — OpenRouter anahtarı gerekmez.`,
+  codex_model:`Codex modeli (opsiyonel)`, codex_model_ph:`boş = codex varsayılanı (ör. gpt-5.3-codex)`,
+  codex_test:`Codex Bağlantısını Test Et`,
+  or_key:`OpenRouter API Anahtari`, or_content_model:`İçerik modeli (kart metni)`, or_research_model:`Araştırma modeli (web · token-verimli)`,
+  btn_save:`Kaydet`, btn_test_key:`Anahtari Test Et`,
+  x_hint:`developer.x.com'dan uygulama olustur (Read+Write), <b>OAuth 1.0a</b> anahtarlarini gir.`,
+  x_save:`X Anahtarlarini Kaydet`, x_test:`Baglantiyi Test Et`,
+  def_title:`Varsayilanlar`, def_hint:`Stüdyo (ana sayfa) acildiginda bu secimler hazir gelir.`,
+  def_lang:`Varsayilan dil`, def_steps:`Adim`, def_template:`Varsayilan sablon`, def_palette:`Varsayilan palet`, def_save:`Varsayilanlari Kaydet`,
+  cards_word:`kart`, gen_generated:`üretildi`, ready:`hazir`,
+  empty_lib:`Henüz seri yok. <b>Stüdyo</b>'dan ilk kartlarini üret.`,
+  lib_open:`Aç`, lib_zip:`ZIP`, lib_del:`Sil`,
+  dl_card:`Bu karti indir`, dl_zip:`Tümünü ZIP indir`, share_x:`X'te paylas`,
+  gen_saved_hint:`Ok tuslari / oklar / kaydirma ile gez · noktalar konumu gosterir · karta tikla → büyük gör. Seri kütüphanene kaydedildi.`,
+  topic_empty:`Bir konu yaz.`, key_needed:`Önce Ayarlar'dan anahtar ekleyin.`,
+  del_title:`Seri silinsin mi?`, del_text:`Bu seri ve tum kartlari kalici olarak silinecek.`, del_done:`Seri silindi.`, cancel:`Vazgeç`,
+  help_body:`
+    <div class="eyebrow">kilavuz</div>
+    <h1 class="title">Yardım & <em>Kullanım</em></h1>
+    <p class="lead">smart.slayt; bir konuyu webden araştırıp 1080×1350 (4:5) bilgi kartı serisine dönüştürür. Aşağıda sağlayıcılar, modeller, özellikler ve nasıl kullanılacağı var.</p>
+    <div class="panel">
+      <h3 style="margin-bottom:6px">🚀 Nasıl Kullanılır</h3>
+      <ol style="margin:14px 0 0 20px;line-height:1.7;font-size:16px;color:var(--ink)">
+        <li><b>Ayarlar</b>'dan bir sağlayıcı seç (OpenRouter için API anahtarı gir; Codex için makinede <code>codex login</code> yeterli).</li>
+        <li><b>Stüdyo</b>'da bir <b>konu</b> yaz (ör. "Bun runtime kurulumu").</li>
+        <li>Dil, adım sayısı, <b>şablon</b> ve <b>renk paleti</b> seç.</li>
+        <li>İstersen <b>Derin araştırma</b>'yı aç (her başlık için ayrı web araması — daha kapsamlı, biraz yavaş).</li>
+        <li><b>Kartları Üret</b>'e bas. Üretilen seri otomatik olarak <b>Kütüphane</b>'ne kaydedilir.</li>
+        <li>Kartları tek tek veya ZIP olarak indir, ya da 𝕏'te paylaş.</li>
+      </ol>
+    </div>
+    <h3 style="font-family:'Fraunces',serif;font-size:26px;margin:34px 0 0">Sağlayıcılar</h3>
+    <div class="sgrid" style="grid-template-columns:1fr 1fr">
+      <div class="panel" style="margin-top:14px">
+        <h3 style="margin-bottom:8px">🌐 OpenRouter</h3>
+        <p class="hint" style="margin-top:0">Web araştırması <b>Perplexity Sonar</b> ile yapılır, kart metinleri seçtiğin içerik modeliyle yazılır. <code>sk-or-v1-...</code> API anahtarı gerekir; kullanım başına kredi harcar.</p>
+        <p class="hint">Modeller: DeepSeek V4 Pro/Flash, Claude Sonnet 4.5, GPT-4o, Gemini 2.5 Flash. Araştırma: Perplexity Sonar / Sonar Pro.</p>
+      </div>
+      <div class="panel" style="margin-top:14px">
+        <h3 style="margin-bottom:8px">⚡ Codex CLI</h3>
+        <p class="hint" style="margin-top:0">Makinedeki <code>codex</code> CLI'ı kullanır. Web araştırmasını <b>kendisi</b> yapar (tek ajan çağrısı). Ayrı API anahtarı gerekmez — mevcut <b>ChatGPT oturumunu</b> (<code>codex login</code>) otomatik kullanır.</p>
+        <p class="hint">Model alanı boş bırakılırsa Codex'in varsayılan modeli kullanılır (ör. <code>gpt-5.3-codex</code>).</p>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:14px;border-color:var(--rust)">
+      <p class="hint" style="margin:0">⚠️ <b>Otomatik yedek:</b> Sağlayıcı <b>Codex</b> seçiliyken bağlantı/oturum yoksa veya Codex hata verirse, uygulama otomatik olarak <b>OpenRouter</b>'a geçer (anahtar tanımlıysa) ve bir uyarı gösterir. Üretim sonrası "hazır · ⚡ Codex / 🌐 OpenRouter" etiketi hangi sağlayıcının kullanıldığını belirtir.</p>
+    </div>
+    <h3 style="font-family:'Fraunces',serif;font-size:26px;margin:34px 0 0">Özellikler</h3>
+    <div class="panel" style="margin-top:14px">
+      <ul style="margin:0 0 0 20px;line-height:1.7;font-size:16px">
+        <li><b>5 şablon:</b> Editorial, Bold, Minimal, Scrapbook, Terminal — kartların yerleşim/tipografi derisi.</li>
+        <li><b>7 renk paleti:</b> Kraft, Forest, Midnight, Blush, Ocean, Sunset, Noir.</li>
+        <li><b>Derin araştırma:</b> her alt-başlık için ayrı web araması yapıp daha doyurucu içerik üretir.</li>
+        <li><b>Otomatik logolar:</b> bilinen marka/araçlar için gerçek logolar webden çekilip karta yerleştirilir.</li>
+        <li><b>Kütüphane:</b> her seri saklanır; carousel'de görüntüle, ZIP indir veya sil.</li>
+        <li><b>𝕏 paylaşımı:</b> seriyi tek tweet ya da thread olarak paylaş (Ayarlar'dan OAuth 1.0a anahtarları).</li>
+        <li><b>Açık/Koyu tema</b> ve 8 dil desteği (TR, EN, DE, FR, ES, IT, RU, AR).</li>
+      </ul>
+    </div>`
+ },
+ en:{
+  brand_sub:`knowledge card studio`,
+  nav_studio:`Studio`, nav_library:`Library`, nav_settings:`Settings`, nav_help:`Help`,
+  foot_note:`Web-researched · 1080×1350 (4:5) knowledge cards.`,
+  studio_eyebrow:`new series`,
+  studio_title:`Give a topic, get a <em>smart card</em> series.`,
+  studio_lead:`Type your topic; the app researches up-to-date data from the web and designs it into knowledge cards with icons, code blocks and comparisons. Pick a template and palette — every series is saved to your library automatically.`,
+  f_topic:`Topic`, ph_topic:`e.g. Passive income with AI in 2025`,
+  f_lang:`Language`, f_steps:`Step count`, f_template:`Template`, f_palette:`Color palette`,
+  deep_label:`🔬 Deep research <span style="color:var(--ink-soft);font-weight:400">— a separate web search per heading (more thorough, a bit slower)</span>`,
+  btn_generate:`Generate Cards`, gen_hint:`web-researched · ~1-2 min in deep mode`,
+  working_title:`Designing cards…`, working_sub:`Researching the web and writing copy`,
+  lib_eyebrow:`saved series`, lib_title:`Library`,
+  lib_lead:`Every series you create is stored here. Download them one by one or all as a ZIP, and reuse anytime.`,
+  back_library:`← Library`,
+  set_eyebrow:`configuration`, set_title:`Settings`,
+  set_lead:`Keys are stored only in the local <code>config.json</code> file.`,
+  prov_title:`Provider`,
+  prov_hint:`Choose the content generator. <b>Codex</b> uses the local CLI (your ChatGPT session) and does its own web research — no OpenRouter key needed.`,
+  codex_model:`Codex model (optional)`, codex_model_ph:`empty = codex default (e.g. gpt-5.3-codex)`,
+  codex_test:`Test Codex Connection`,
+  or_key:`OpenRouter API Key`, or_content_model:`Content model (card text)`, or_research_model:`Research model (web · token-efficient)`,
+  btn_save:`Save`, btn_test_key:`Test Key`,
+  x_hint:`Create an app at developer.x.com (Read+Write), then enter your <b>OAuth 1.0a</b> keys.`,
+  x_save:`Save X Keys`, x_test:`Test Connection`,
+  def_title:`Defaults`, def_hint:`These selections are preloaded when Studio (home) opens.`,
+  def_lang:`Default language`, def_steps:`Steps`, def_template:`Default template`, def_palette:`Default palette`, def_save:`Save Defaults`,
+  cards_word:`cards`, gen_generated:`generated`, ready:`ready`,
+  empty_lib:`No series yet. Generate your first cards from <b>Studio</b>.`,
+  lib_open:`Open`, lib_zip:`ZIP`, lib_del:`Delete`,
+  dl_card:`Download this card`, dl_zip:`Download all as ZIP`, share_x:`Share on X`,
+  gen_saved_hint:`Arrow keys / arrows / swipe to browse · dots show position · click a card → view large. The series is saved to your library.`,
+  topic_empty:`Enter a topic.`, key_needed:`Add a key in Settings first.`,
+  del_title:`Delete this series?`, del_text:`This series and all its cards will be permanently deleted.`, del_done:`Series deleted.`, cancel:`Cancel`,
+  help_body:`
+    <div class="eyebrow">guide</div>
+    <h1 class="title">Help & <em>Usage</em></h1>
+    <p class="lead">smart.slayt researches a topic on the web and turns it into a 1080×1350 (4:5) knowledge-card series. Below are the providers, models, features and how to use it.</p>
+    <div class="panel">
+      <h3 style="margin-bottom:6px">🚀 How to Use</h3>
+      <ol style="margin:14px 0 0 20px;line-height:1.7;font-size:16px;color:var(--ink)">
+        <li>Pick a provider in <b>Settings</b> (enter an API key for OpenRouter; for Codex, <code>codex login</code> on your machine is enough).</li>
+        <li>Type a <b>topic</b> in <b>Studio</b> (e.g. "Installing the Bun runtime").</li>
+        <li>Choose language, step count, <b>template</b> and <b>color palette</b>.</li>
+        <li>Optionally enable <b>Deep research</b> (a separate web search per heading — more thorough, a bit slower).</li>
+        <li>Hit <b>Generate Cards</b>. The series is saved to your <b>Library</b> automatically.</li>
+        <li>Download cards individually or as a ZIP, or share on 𝕏.</li>
+      </ol>
+    </div>
+    <h3 style="font-family:'Fraunces',serif;font-size:26px;margin:34px 0 0">Providers</h3>
+    <div class="sgrid" style="grid-template-columns:1fr 1fr">
+      <div class="panel" style="margin-top:14px">
+        <h3 style="margin-bottom:8px">🌐 OpenRouter</h3>
+        <p class="hint" style="margin-top:0">Web research runs via <b>Perplexity Sonar</b>; card copy is written by your chosen content model. Requires an <code>sk-or-v1-...</code> API key and spends credit per use.</p>
+        <p class="hint">Models: DeepSeek V4 Pro/Flash, Claude Sonnet 4.5, GPT-4o, Gemini 2.5 Flash. Research: Perplexity Sonar / Sonar Pro.</p>
+      </div>
+      <div class="panel" style="margin-top:14px">
+        <h3 style="margin-bottom:8px">⚡ Codex CLI</h3>
+        <p class="hint" style="margin-top:0">Uses the local <code>codex</code> CLI. It does web research <b>itself</b> (a single agent call). No separate API key — it automatically uses your existing <b>ChatGPT session</b> (<code>codex login</code>).</p>
+        <p class="hint">Leave the model field empty to use Codex's default model (e.g. <code>gpt-5.3-codex</code>).</p>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:14px;border-color:var(--rust)">
+      <p class="hint" style="margin:0">⚠️ <b>Automatic fallback:</b> When <b>Codex</b> is selected but there's no connection/session, or Codex errors, the app automatically switches to <b>OpenRouter</b> (if a key is set) and shows a warning. After generation the "ready · ⚡ Codex / 🌐 OpenRouter" label shows which provider was used.</p>
+    </div>
+    <h3 style="font-family:'Fraunces',serif;font-size:26px;margin:34px 0 0">Features</h3>
+    <div class="panel" style="margin-top:14px">
+      <ul style="margin:0 0 0 20px;line-height:1.7;font-size:16px">
+        <li><b>5 templates:</b> Editorial, Bold, Minimal, Scrapbook, Terminal — the layout/typography skin of the cards.</li>
+        <li><b>7 color palettes:</b> Kraft, Forest, Midnight, Blush, Ocean, Sunset, Noir.</li>
+        <li><b>Deep research:</b> runs a separate web search per sub-heading for richer content.</li>
+        <li><b>Automatic logos:</b> real logos for known brands/tools are fetched from the web and placed on the card.</li>
+        <li><b>Library:</b> every series is stored; view in a carousel, download ZIP or delete.</li>
+        <li><b>𝕏 sharing:</b> share a series as a single tweet or a thread (OAuth 1.0a keys in Settings).</li>
+        <li><b>Light/Dark theme</b> and 8-language support (TR, EN, DE, FR, ES, IT, RU, AR).</li>
+      </ul>
+    </div>`
+ }
+};
+function t(k){return (I18N[UILANG]&&I18N[UILANG][k])||I18N.tr[k]||k;}
+function setUILang(l){
+  UILANG=(l==='en')?'en':'tr'; localStorage.setItem('uilang',UILANG);
+  document.querySelectorAll('[data-i18n]').forEach(e=>{const v=t(e.getAttribute('data-i18n'));if(v)e.textContent=v;});
+  document.querySelectorAll('[data-i18n-html]').forEach(e=>{const v=t(e.getAttribute('data-i18n-html'));if(v)e.innerHTML=v;});
+  document.querySelectorAll('[data-i18n-ph]').forEach(e=>{const v=t(e.getAttribute('data-i18n-ph'));if(v)e.placeholder=v;});
+  // Tek toggle: mevcut dilde KARSI dilin etiketini goster (tikla -> gec)
+  const lf=document.getElementById('langFab'); if(lf)lf.textContent=UILANG==='tr'?'EN':'TR';
+  if(typeof renderProviders==='function')renderProviders();
+  const lib=document.getElementById('view-library'); if(lib&&lib.classList.contains('active'))loadLibrary();
+}
+function toggleUILang(){ setUILang(UILANG==='tr'?'en':'tr'); }
+
+function go(v){
+  ['studio','library','settings','detail','help'].forEach(x=>{
+    document.getElementById('view-'+x).classList.toggle('active',x===v);
+  });
+  ['studio','library','settings','help'].forEach(x=>{
+    const b=document.getElementById('nav-'+x); if(b) b.classList.toggle('active',x===v);
+  });
+  if(v==='library') loadLibrary();
+}
+function toast(m,k){const t=document.getElementById('toast');t.textContent=m;t.className='show '+(k||'');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.className=t.className.replace('show','').trim(),3400);}
+function fmtDate(ms){return new Date(ms).toLocaleString('tr-TR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function openLb(u){document.getElementById('lbimg').src=u;document.getElementById('lb').classList.add('show');}
+function closeLb(e){if(e.target.id==='lb'||e.target.classList.contains('x'))document.getElementById('lb').classList.remove('show');}
+
+// indirme yardimcisi (ayni origin -> download attribute calisir)
+function download(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();}
+
+// ---- Carousel (sosyal medya onizleme) ----
+let _cz={cards:[],i:0,zipId:null};
+function buildCarousel(cards,mountId,zipId){
+  _cz={cards,i:0,zipId};
+  const slides=cards.map(c=>`<div class="slide"><img src="${c.url}" onclick="openLb('${c.url}')"/></div>`).join('');
+  const dots=cards.map((_,i)=>`<div class="dot ${i===0?'active':''}" onclick="czGo(${i})"></div>`).join('');
+  document.getElementById(mountId).innerHTML=`
+    <div class="carousel">
+      <div class="stage">
+        <button class="cnav" id="czPrev" onclick="czStep(-1)">‹</button>
+        <div class="viewport"><div class="track" id="czTrack">${slides}</div></div>
+        <button class="cnav" id="czNext" onclick="czStep(1)">›</button>
+      </div>
+      <div class="counter" id="czCount">1 / ${cards.length}</div>
+      <div class="dots" id="czDots">${dots}</div>
+      <div class="tools">
+        <button class="btn sm" onclick="czDownloadCurrent()"><span>⬇</span> ${t('dl_card')}</button>
+        ${zipId!=null?`<button class="btn dark sm" onclick="download('/api/sets/${zipId}/zip','seri-${zipId}.zip')"><span>⬇</span> ${t('dl_zip')}</button>`:''}
+        ${zipId!=null?`<button class="btn sm" style="background:#1d1d1f" onclick="shareToX(${zipId})"><span>𝕏</span> ${t('share_x')}</button>`:''}
+      </div>
+    </div>`;
+  czUpdate();
+}
+function czUpdate(){
+  const t=document.getElementById('czTrack'); if(!t)return;
+  t.style.transform=`translateX(-${_cz.i*100}%)`;
+  document.getElementById('czCount').textContent=`${_cz.i+1} / ${_cz.cards.length}`;
+  document.querySelectorAll('#czDots .dot').forEach((d,i)=>d.classList.toggle('active',i===_cz.i));
+  const p=document.getElementById('czPrev'),n=document.getElementById('czNext');
+  if(p)p.disabled=_cz.i===0; if(n)n.disabled=_cz.i===_cz.cards.length-1;
+}
+function czGo(i){_cz.i=Math.max(0,Math.min(_cz.cards.length-1,i));czUpdate();}
+function czStep(d){czGo(_cz.i+d);}
+function czDownloadCurrent(){const c=_cz.cards[_cz.i];if(c)download(c.url,c.filename||c.name);}
+// klavye ok tuslari
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('czTrack'))return;
+  if(document.getElementById('lb').classList.contains('show'))return;
+  if(e.key==='ArrowLeft')czStep(-1); else if(e.key==='ArrowRight')czStep(1);
+});
+// dokunmatik / fare ile kaydirma
+let _sx=null;
+document.addEventListener('touchstart',e=>{if(document.getElementById('czTrack'))_sx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{if(_sx==null)return;const dx=e.changedTouches[0].clientX-_sx;if(Math.abs(dx)>45)czStep(dx<0?1:-1);_sx=null;});
+
+// ---- Settings ----
+async function loadSettings(){
+  const d=await (await fetch('/api/settings')).json();
+  configured=d.configured; document.getElementById('model').value=d.model;
+  _provider=d.provider||'openrouter';
+  const cm=document.getElementById('codexModel'); if(cm)cm.value=d.codexModel||'';
+  if(typeof renderProviders==='function')renderProviders();
+  const rm=document.getElementById('researchModel'); if(rm&&d.researchModel)rm.value=d.researchModel;
+  document.getElementById('currentKey').textContent=d.configured?('Kayitli: '+d.maskedKey):'Henuz anahtar kaydedilmedi.';
+  const chip=document.getElementById('keychip');
+  chip.className='keychip '+(d.configured?'on':'off');
+  chip.textContent=d.configured?'● anahtar aktif':'● anahtar yok';
+  _xReady=d.xConfigured;
+  const xc=document.getElementById('xchip');
+  if(xc){xc.className='keychip '+(d.xConfigured?'on':'off');xc.textContent=d.xConfigured?'● bagli':'● bagli degil';}
+  const xcur=document.getElementById('xCurrent');
+  if(xcur){xcur.innerHTML=d.xConfigured
+    ?`✓ Kayitli · API Key: <b>${d.xMasked.appKey}</b> · Access Token: <b>${d.xMasked.accessToken}</b>`
+    :'Henuz X anahtari kaydedilmedi.';}
+  // varsayilanlari hem Studio'ya hem Ayarlar formuna uygula
+  const def=d.defaults||{lang:'tr',steps:8,template:'editorial',palette:'kraft'};
+  _palette=def.palette; _template=def.template;
+  const ls=document.getElementById('lang'); if(ls)ls.value=def.lang;
+  const ss=document.getElementById('steps'); if(ss)ss.value=def.steps;
+  if(typeof renderPals==='function')renderPals();
+  if(typeof renderTpls==='function')renderTpls();
+  ['dLang','dSteps','dTpl'].forEach((id,k)=>{const e=document.getElementById(id);if(e)e.value=[def.lang,def.steps,def.template][k];});
+  _dPal=def.palette; if(typeof renderDPals==='function')renderDPals();
+}
+let _dPal='kraft';
+function renderDPals(){
+  const el=document.getElementById('dPals'); if(!el)return;
+  el.innerHTML=Object.entries(PAL_PREVIEW).map(([k,[bg,acc]])=>
+    `<div class="pal ${k===_dPal?'sel':''}" onclick="pickDPal('${k}')">
+       <div class="sw" style="background:${bg}"><div class="acc" style="background:${acc}"></div></div>
+       <span class="nm">${k}</span></div>`).join('');
+}
+function pickDPal(k){_dPal=k;renderDPals();}
+async function saveDefaults(){
+  const defaults={lang:val('dLang'),steps:val('dSteps'),template:val('dTpl'),palette:_dPal};
+  await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({defaults})});
+  await loadSettings();
+  const st=document.getElementById('defStatus');st.textContent='Varsayilanlar kaydedildi. Stüdyo bunlarla acilacak.';st.className='status ok';
+  toast('Varsayilanlar kaydedildi.','ok');
+}
+// ---- Saglayici (OpenRouter / Codex) ----
+let _provider='openrouter';
+function renderProviders(){
+  const el=document.getElementById('providerPals'); if(!el)return;
+  const opts=[['openrouter','🌐','OpenRouter'],['codex','⚡','Codex CLI']];
+  el.innerHTML=opts.map(([k,ic,nm])=>
+    `<div class="pal ${k===_provider?'sel':''}" onclick="pickProvider('${k}')" style="min-width:120px">
+       <div class="sw" style="display:flex;align-items:center;justify-content:center;font-size:24px">${ic}</div>
+       <span class="nm">${nm}</span></div>`).join('');
+  const box=document.getElementById('codexBox'); if(box)box.style.display=_provider==='codex'?'block':'none';
+}
+function pickProvider(k){_provider=k;renderProviders();saveProvider();}
+async function saveProvider(){
+  const codexModel=(document.getElementById('codexModel')||{}).value||'';
+  await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider:_provider,codexModel})});
+  toast('Sağlayıcı: '+(_provider==='codex'?'Codex CLI':'OpenRouter'),'ok');
+}
+async function testCodex(){
+  const st=document.getElementById('codexStatus');st.textContent='Test ediliyor…';st.className='status';
+  try{
+    const d=await (await fetch('/api/codex/test',{method:'POST'})).json();
+    st.textContent=d.message;st.className='status '+(d.ok?'ok':'err');toast(d.message,d.ok?'ok':'err');
+  }catch(e){st.textContent=e.message;st.className='status err';}
+}
+let _xReady=false;
+async function saveX(){
+  const x={appKey:val('xAppKey'),appSecret:val('xAppSecret'),accessToken:val('xAccessToken'),accessSecret:val('xAccessSecret')};
+  await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({x})});
+  ['xAppKey','xAppSecret','xAccessToken','xAccessSecret'].forEach(id=>document.getElementById(id).value='');
+  await loadSettings();toast('X anahtarlari kaydedildi.','ok');
+}
+async function testX(){
+  const st=document.getElementById('xStatus');st.textContent='Test ediliyor…';st.className='status';
+  const d=await (await fetch('/api/x/test',{method:'POST'})).json();
+  st.textContent=d.message;st.className='status '+(d.ok?'ok':'err');toast(d.message,d.ok?'ok':'err');
+}
+function val(id){return document.getElementById(id).value;}
+let _sharing=false;
+function shareToX(setId){
+  if(!_xReady){toast('Önce Ayarlar’dan X anahtarlarini ekle.','err');go('settings');return;}
+  const n=_cz.cards.length, tweets=Math.ceil(n/4);
+  confirmModal({
+    title:'X’te paylasilsin mi?',
+    text:`Bu seri (${n} kart) ${tweets>1?tweets+' tweetlik thread':'tek tweet'} olarak @hesabinda paylasilacak.`,
+    okText:'Paylas', okColor:'#1d1d1f',
+    onOk:()=>doShare(setId)
+  });
+}
+async function doShare(setId){
+  if(_sharing){toast('Zaten paylasiliyor, bekle…');return;}   // cift gonderim korumasi
+  _sharing=true; toast('X’te paylasiliyor…');
+  try{
+    const d=await (await fetch('/api/x/share',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({setId})})).json();
+    if(d.ok){toast('Paylasildi! '+d.tweets+' tweet.','ok');window.open(d.url,'_blank');}
+    else toast('X hatasi: '+(d.error||'bilinmiyor'),'err');
+  }catch(e){toast('X hatasi: '+e.message,'err');}
+  finally{_sharing=false;}
+}
+async function saveSettings(){
+  const apiKey=document.getElementById('apiKey').value, model=document.getElementById('model').value;
+  const researchModel=document.getElementById('researchModel').value;
+  await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({apiKey,model,researchModel})});
+  document.getElementById('apiKey').value=''; await loadSettings(); toast('Ayarlar kaydedildi.','ok');
+}
+async function testKey(){
+  const apiKey=document.getElementById('apiKey').value;
+  const st=document.getElementById('setStatus');st.textContent='Test ediliyor…';st.className='status';
+  const d=await (await fetch('/api/test-key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({apiKey})})).json();
+  st.textContent=d.message;st.className='status '+(d.ok?'ok':'err');toast(d.message,d.ok?'ok':'err');
+}
+
+// ---- Generate ----
+async function generate(){
+  if(_provider!=='codex' && !configured){toast(t('key_needed'),'err');go('settings');return;}
+  const topic=document.getElementById('topic').value.trim();
+  if(!topic){toast(t('topic_empty'),'err');return;}
+  const steps=document.getElementById('steps').value;
+  const lang=document.getElementById('lang').value;
+  const btn=document.getElementById('genBtn');btn.disabled=true;
+  document.getElementById('working').classList.add('show');
+  document.getElementById('result').innerHTML='';
+  try{
+    const deep=document.getElementById('deep').checked;
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,steps,lang,palette:_palette,template:_template,deep})});
+    const d=await r.json(); if(!r.ok)throw new Error(d.error||'Hata');
+    if(d.warning)toast('⚠️ '+d.warning,'err');
+    const provLabel=d.provider==='codex'?'⚡ Codex':'🌐 OpenRouter';
+    document.getElementById('result').innerHTML=`<div style="margin-top:34px;text-align:center">
+      <div class="eyebrow">${t('ready')} · ${provLabel}</div><h1 class="title" style="font-size:34px">${d.count} ${t('cards_word')} ${t('gen_generated')}</h1></div>
+      <div id="genCarousel"></div>
+      <p class="hint" style="text-align:center">${t('gen_saved_hint')}</p>`;
+    buildCarousel(d.cards,'genCarousel',d.id);
+    toast(d.count+' '+t('cards_word')+' '+t('gen_generated')+' · '+provLabel,'ok');
+  }catch(e){toast('Hata: '+e.message,'err');}
+  finally{btn.disabled=false;document.getElementById('working').classList.remove('show');}
+}
+
+// ---- Library ----
+async function loadLibrary(){
+  const sets=await (await fetch('/api/sets')).json();
+  const el=document.getElementById('setlist');
+  if(!sets.length){el.innerHTML=`<div class="empty"><div class="big">✦</div><p>${t('empty_lib')}</p></div>`;return;}
+  el.innerHTML=sets.map(s=>{
+    const strip=s.cards.slice(0,4).map(c=>`<img src="${c.url}"/>`).join('');
+    return `<div class="setcard" onclick="openSet(${s.id})" style="cursor:pointer">
+      <div class="strip">${strip}</div>
+      <div class="meta"><h3>${s.topic}</h3>
+        <div class="sub"><b>${s.count} ${t('cards_word')}</b> · ${s.model||'—'} · ${fmtDate(s.createdAt)}</div></div>
+      <div class="acts" onclick="event.stopPropagation()">
+        <button class="abtn open" title="${t('lib_open')}" onclick="openSet(${s.id})"><span class="i">▦</span><span class="t">${t('lib_open')}</span></button>
+        <button class="abtn zip" title="${t('dl_zip')}" onclick="download('/api/sets/${s.id}/zip','seri-${s.id}.zip')"><span class="i">⬇</span><span class="t">${t('lib_zip')}</span></button>
+        <button class="abtn del" title="${t('lib_del')}" onclick="askDelete(${s.id})"><span class="i">🗑</span><span class="t">${t('lib_del')}</span></button>
+      </div></div>`;
+  }).join('');
+}
+async function openSet(id){
+  const s=await (await fetch('/api/sets/'+id)).json();
+  document.getElementById('detailTitle').textContent=s.topic;
+  document.getElementById('detailSub').textContent=`${s.count} ${t('cards_word')} · ${fmtDate(s.createdAt)} · ${s.model||''}`;
+  go('detail');
+  buildCarousel(s.cards,'detailCards',id);
+}
+// genel onay penceresi
+function confirmModal({title,text,okText,okColor,onOk}){
+  document.getElementById('mTitle').textContent=title||'Emin misin?';
+  document.getElementById('mText').textContent=text||'';
+  const ok=document.getElementById('mOk');
+  ok.textContent=okText||'Tamam'; ok.style.background=okColor||'#b03030';
+  ok.onclick=()=>{closeModal();onOk&&onOk();};
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+function askDelete(id){
+  confirmModal({title:t('del_title'),text:t('del_text'),
+    okText:t('lib_del'),okColor:'#b03326',
+    onOk:async()=>{await fetch('/api/sets/'+id,{method:'DELETE'});loadLibrary();toast(t('del_done'),'ok');}});
+}
+
+// --- Palet secici ---
+const PAL_PREVIEW={kraft:['#F3E9DA','#B5482E'],forest:['#E6F0E8','#1F7A52'],midnight:['#222937','#E0B354'],
+  blush:['#FBF1F3','#A6385B'],ocean:['#F2F6FA','#1E6FB8'],sunset:['#FEF4EB','#D2562A'],noir:['#F7F7F5','#111111']};
+let _palette='kraft';
+function renderPals(){
+  document.getElementById('pals').innerHTML=Object.entries(PAL_PREVIEW).map(([k,[bg,acc]])=>
+    `<div class="pal ${k===_palette?'sel':''}" onclick="pickPal('${k}')">
+       <div class="sw" style="background:${bg}"><div class="acc" style="background:${acc}"></div></div>
+       <span class="nm">${k}</span></div>`).join('');
+}
+function pickPal(k){_palette=k;renderPals();}
+renderPals();
+
+// --- Template secici ---
+const TPL_INFO={editorial:['📰','Editorial'],bold:['🅱️','Bold'],minimal:['◻️','Minimal'],scrapbook:['✂️','Scrapbook'],terminal:['⌨️','Terminal']};
+let _template='editorial';
+function renderTpls(){
+  document.getElementById('tpls').innerHTML=Object.entries(TPL_INFO).map(([k,[ic,nm]])=>
+    `<div class="pal ${k===_template?'sel':''}" onclick="pickTpl('${k}')" style="min-width:78px">
+       <div class="sw" style="display:flex;align-items:center;justify-content:center;font-size:24px">${ic}</div>
+       <span class="nm">${nm}</span></div>`).join('');
+}
+function pickTpl(k){_template=k;renderTpls();}
+renderTpls();
+
+// --- Tema (acik/koyu) ---
+function applyThemeBtn(){
+  const dark=document.documentElement.dataset.theme==='dark';
+  const b=document.getElementById('themeFab');
+  if(b){b.textContent=dark?'☀️':'🌙';b.title=dark?'Açik temaya geç':'Koyu temaya geç';}
+}
+function toggleTheme(){
+  const t=document.documentElement.dataset.theme==='dark'?'light':'dark';
+  document.documentElement.dataset.theme=t; localStorage.setItem('theme',t); applyThemeBtn();
+}
+applyThemeBtn();
+
+loadSettings();
+setUILang(UILANG);
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "smart_slayt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "archiver": "^8.0.0",
+    "better-sqlite3": "^12.10.0",
+    "express": "^5.2.1",
+    "playwright": "^1.60.0",
+    "twitter-api-v2": "^1.29.0"
+  }
+}

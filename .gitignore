@@ -1,0 +1,37 @@
+# ---- Secrets / local config (NEVER commit) ----
+config.json
+*.env
+.env*
+
+# ---- Dependencies ----
+node_modules/
+
+# ---- Generated output & data ----
+out/
+*.db
+*.db-shm
+*.db-wal
+*.log
+last-content.json
+codex-test.json
+
+# ---- AI tooling / assistants ----
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.claude/
+.codex/
+.cursor/
+.aider*
+.hermes/
+.ruflo/
+.github/copilot-instructions.md
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Playwright MCP artifacts
+.playwright-mcp/

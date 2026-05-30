@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#C2532F"/>
+      <stop offset="1" stop-color="#8F3520"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBF4E9"/>
+      <stop offset="1" stop-color="#F0E2CC"/>
+    </linearGradient>
+  </defs>
+
+  <!-- arka plan tile -->
+  <rect x="64" y="64" width="896" height="896" rx="208" fill="url(#bg)"/>
+
+  <!-- arkadaki kayan kart katmanlari (carousel/slayt hissi) -->
+  <rect x="300" y="276" width="424" height="500" rx="56" fill="#FBF4E9" opacity="0.22"
+        transform="rotate(-9 512 512)"/>
+  <rect x="300" y="276" width="424" height="500" rx="56" fill="#FBF4E9" opacity="0.4"
+        transform="rotate(-4 512 512)"/>
+
+  <!-- on kart -->
+  <rect x="306" y="282" width="412" height="488" rx="52" fill="url(#card)"/>
+
+  <!-- yildiz (uygulamanin imza isareti) -->
+  <g stroke="#B5482E" stroke-width="34" stroke-linecap="round">
+    <line x1="512" y1="430" x2="512" y2="372"/>
+    <line x1="512" y1="650" x2="512" y2="592"/>
+    <line x1="402" y1="511" x2="344" y2="511"/>
+    <line x1="680" y1="511" x2="622" y2="511"/>
+    <line x1="434" y1="433" x2="393" y2="392"/>
+    <line x1="590" y1="589" x2="631" y2="630"/>
+    <line x1="590" y1="433" x2="631" y2="392"/>
+    <line x1="434" y1="589" x2="393" y2="630"/>
+  </g>
+  <circle cx="512" cy="511" r="20" fill="#B5482E"/>
+</svg>
