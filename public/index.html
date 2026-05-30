@@ -443,6 +443,7 @@
 
 <script>
 let configured=false;
+let _settings=null;
 
 // ===== i18n (TR/EN arayuz dili) =====
 let UILANG=localStorage.getItem('uilang')||'tr';
@@ -480,6 +481,8 @@ const I18N={
   dl_card:`Bu karti indir`, dl_zip:`Tümünü ZIP indir`, share_x:`X'te paylas`,
   gen_saved_hint:`Ok tuslari / oklar / kaydirma ile gez · noktalar konumu gosterir · karta tikla → büyük gör. Seri kütüphanene kaydedildi.`,
   topic_empty:`Bir konu yaz.`, key_needed:`Önce Ayarlar'dan anahtar ekleyin.`,
+  key_active:`anahtar aktif`, key_none:`anahtar yok`, key_saved:`Kayıtlı`, key_unsaved:`Henüz anahtar kaydedilmedi.`,
+  x_on:`bağlı`, x_off:`bağlı değil`, x_unsaved:`Henüz X anahtarı kaydedilmedi.`,
   del_title:`Seri silinsin mi?`, del_text:`Bu seri ve tum kartlari kalici olarak silinecek.`, del_done:`Seri silindi.`, cancel:`Vazgeç`,
   help_body:`
     <div class="eyebrow">kilavuz</div>
@@ -558,6 +561,8 @@ const I18N={
   dl_card:`Download this card`, dl_zip:`Download all as ZIP`, share_x:`Share on X`,
   gen_saved_hint:`Arrow keys / arrows / swipe to browse · dots show position · click a card → view large. The series is saved to your library.`,
   topic_empty:`Enter a topic.`, key_needed:`Add a key in Settings first.`,
+  key_active:`key active`, key_none:`no key`, key_saved:`Saved`, key_unsaved:`No key saved yet.`,
+  x_on:`connected`, x_off:`not connected`, x_unsaved:`No X keys saved yet.`,
   del_title:`Delete this series?`, del_text:`This series and all its cards will be permanently deleted.`, del_done:`Series deleted.`, cancel:`Cancel`,
   help_body:`
     <div class="eyebrow">guide</div>
@@ -605,6 +610,20 @@ const I18N={
  }
 };
 function t(k){return (I18N[UILANG]&&I18N[UILANG][k])||I18N.tr[k]||k;}
+// Anahtar/X durum metinleri (saklanan ayarlardan) — secili UI diline gore yazilir.
+function applyStatusI18n(){
+  const d=_settings; if(!d) return;
+  const ck=document.getElementById('currentKey');
+  if(ck) ck.textContent=d.configured?(t('key_saved')+': '+d.maskedKey):t('key_unsaved');
+  const chip=document.getElementById('keychip');
+  if(chip){chip.className='keychip '+(d.configured?'on':'off');chip.textContent='● '+(d.configured?t('key_active'):t('key_none'));}
+  const xc=document.getElementById('xchip');
+  if(xc){xc.className='keychip '+(d.xConfigured?'on':'off');xc.textContent='● '+(d.xConfigured?t('x_on'):t('x_off'));}
+  const xcur=document.getElementById('xCurrent');
+  if(xcur){xcur.innerHTML=d.xConfigured
+    ?`✓ ${t('key_saved')} · API Key: <b>${d.xMasked.appKey}</b> · Access Token: <b>${d.xMasked.accessToken}</b>`
+    :t('x_unsaved');}
+}
 function setUILang(l){
   UILANG=(l==='en')?'en':'tr'; localStorage.setItem('uilang',UILANG);
   document.querySelectorAll('[data-i18n]').forEach(e=>{const v=t(e.getAttribute('data-i18n'));if(v)e.textContent=v;});
@@ -613,6 +632,7 @@ function setUILang(l){
   // Tek toggle: mevcut dilde KARSI dilin etiketini goster (tikla -> gec)
   const lf=document.getElementById('langFab'); if(lf)lf.textContent=UILANG==='tr'?'EN':'TR';
   if(typeof renderProviders==='function')renderProviders();
+  applyStatusI18n();   // anahtar/X durum chip ve metinlerini yeni dile cevir
   const lib=document.getElementById('view-library'); if(lib&&lib.classList.contains('active'))loadLibrary();
 }
 function toggleUILang(){ setUILang(UILANG==='tr'?'en':'tr'); }
@@ -688,17 +708,9 @@ async function loadSettings(){
   const cm=document.getElementById('codexModel'); if(cm)cm.value=d.codexModel||'';
   if(typeof renderProviders==='function')renderProviders();
   const rm=document.getElementById('researchModel'); if(rm&&d.researchModel)rm.value=d.researchModel;
-  document.getElementById('currentKey').textContent=d.configured?('Kayitli: '+d.maskedKey):'Henuz anahtar kaydedilmedi.';
-  const chip=document.getElementById('keychip');
-  chip.className='keychip '+(d.configured?'on':'off');
-  chip.textContent=d.configured?'● anahtar aktif':'● anahtar yok';
+  _settings=d;            // dil degisiminde durum metinlerini yeniden yazabilmek icin sakla
   _xReady=d.xConfigured;
-  const xc=document.getElementById('xchip');
-  if(xc){xc.className='keychip '+(d.xConfigured?'on':'off');xc.textContent=d.xConfigured?'● bagli':'● bagli degil';}
-  const xcur=document.getElementById('xCurrent');
-  if(xcur){xcur.innerHTML=d.xConfigured
-    ?`✓ Kayitli · API Key: <b>${d.xMasked.appKey}</b> · Access Token: <b>${d.xMasked.accessToken}</b>`
-    :'Henuz X anahtari kaydedilmedi.';}
+  applyStatusI18n();
   // varsayilanlari hem Studio'ya hem Ayarlar formuna uygula
   const def=d.defaults||{lang:'tr',steps:8,template:'editorial',palette:'kraft'};
   _palette=def.palette; _template=def.template;
