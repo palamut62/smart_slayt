@@ -41,7 +41,7 @@ app.get("/api/settings", (req, res) => {
     codexModel: cfg.codexModel || "",
     xConfigured: !!(x.appKey && x.appSecret && x.accessToken && x.accessSecret),
     xMasked: { appKey: maskKey(x.appKey), accessToken: maskKey(x.accessToken) },
-    defaults: cfg.defaults || { lang: "tr", steps: 8, template: "editorial", palette: "kraft" },
+    defaults: cfg.defaults || { lang: "tr", steps: 8, template: "editorial", palette: "kraft", deep: true },
   });
 });
 app.post("/api/settings", (req, res) => {
@@ -59,6 +59,7 @@ app.post("/api/settings", (req, res) => {
       steps: Math.max(1, Math.min(15, parseInt(defaults.steps, 10) || cur.steps || 8)),
       template: TEMPLATES.includes(defaults.template) ? defaults.template : (cur.template || "editorial"),
       palette: PALETTES.includes(defaults.palette) ? defaults.palette : (cur.palette || "kraft"),
+      deep: typeof defaults.deep === "boolean" ? defaults.deep : (cur.deep !== false),
     };
   }
   if (x && typeof x === "object") {

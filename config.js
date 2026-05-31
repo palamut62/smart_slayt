@@ -8,7 +8,7 @@ const CONFIG_PATH = resolve(__dirname, "config.json");
 
 // Tek kaynak: palet / template / dil listeleri (template.html + server.js senkron kalsin)
 export const PALETTES = ["kraft", "forest", "midnight", "blush", "ocean", "sunset", "noir"];
-export const TEMPLATES = ["editorial", "bold", "minimal", "scrapbook", "terminal"];
+export const TEMPLATES = ["editorial", "bold", "minimal", "scrapbook", "terminal", "infocard"];
 export const LANG_CODES = ["tr", "en", "de", "fr", "es", "it", "ru", "ar"];
 
 export function loadConfig() {
@@ -16,7 +16,7 @@ export function loadConfig() {
     return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
   } catch {
     return { apiKey: "", model: "deepseek/deepseek-v4-pro", researchModel: "perplexity/sonar",
-      defaults: { lang: "tr", steps: 8, template: "editorial", palette: "kraft" } };
+      defaults: { lang: "tr", steps: 8, template: "editorial", palette: "kraft", deep: true } };
   }
 }
 

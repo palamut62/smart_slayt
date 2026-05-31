@@ -140,6 +140,75 @@
   .tpl-term ul.points li::before{content:"\203A";background:none;color:var(--rust);font-size:30px;top:0;width:auto;height:auto;font-weight:700;}
   .tpl-term .callout{border:1px solid var(--rust);border-left-width:7px;border-radius:8px;font-family:'Space Grotesk',sans-serif;}
   .tpl-term .callout::before{content:"// ";color:var(--rust);font-family:'Roboto Mono',monospace;}
+
+  /* ============ TEMPLATE: INFOCARD (bilgi karti) ============ */
+  /* Duzen / ikon / yerlesim SABIT; SADECE renk paleti degisir.
+     Tum renkler palette token'larindan (var --card/--rust/--ink ...) gelir. */
+  .tpl-info .corner{display:none;}
+  .tpl-info .mute{display:none;}
+  .tpl-info .card{
+    border:1px solid var(--line);border-radius:22px;padding:150px 56px 56px;
+    background:
+      linear-gradient(color-mix(in srgb,var(--rust) 6%,transparent) 1px,transparent 1px) 0 0/100% 56px,
+      linear-gradient(90deg,color-mix(in srgb,var(--rust) 6%,transparent) 1px,transparent 1px) 0 0/56px 100%,
+      var(--card);
+  }
+  /* ust bar: yer imi + "Postu Kaydet" + alt turuncu ayrac */
+  .tpl-info .card::before{
+    content:"\1F516  Postu Kaydet";box-sizing:border-box;
+    position:absolute;top:0;left:0;right:0;height:108px;padding:42px 56px 0;
+    border-bottom:2px solid var(--rust);
+    color:var(--rust);font-family:'Roboto Mono',monospace;font-size:30px;font-weight:700;letter-spacing:.5px;
+  }
+  .tpl-info .card::after{
+    content:"@esadcom";position:absolute;top:46px;right:56px;z-index:1;
+    font-family:'Roboto Mono',monospace;font-size:28px;font-weight:600;color:var(--ink);opacity:.85;
+  }
+  /* "// 01" adim etiketi */
+  .tpl-info .step-label{color:var(--rust);font-family:'Roboto Mono',monospace;font-size:30px;
+    font-weight:700;letter-spacing:2px;text-transform:none;}
+  .tpl-info .step-label::before{content:"// ";}
+  /* sag ust "01 / 07" benzeri kucuk sayac */
+  .tpl-info .bignum{font-family:'Roboto Mono',monospace;font-style:normal;font-size:30px;font-weight:700;
+    color:var(--muted);opacity:.45;top:154px;right:56px;line-height:1;}
+  /* baslik: ana metin rengi + turuncu vurgu, condensed uppercase */
+  .tpl-info .title{color:var(--ink);font-size:92px;line-height:.98;font-weight:900;letter-spacing:-1px;text-transform:uppercase;}
+  .tpl-info .title .it{font-style:normal;color:var(--rust);}
+  .tpl-info .title .rust{color:var(--rust);}
+  /* pixel robot maskotu (sag ust) -- maske ile palet rengini alir, gozler oyuk */
+  .tpl-info .title::after{content:"";position:absolute;top:-92px;right:0;width:122px;height:84px;
+    background:var(--rust-soft);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 122 84'%3E%3Cpath fill-rule='evenodd' d='M22 14H100V62H22Z M10 28H21V48H10Z M101 28H112V48H101Z M30 61H41V76H30Z M55 61H66V76H55Z M80 61H91V76H80Z M40 30H52V47H40Z M70 30H82V47H70Z'/%3E%3C/svg%3E") no-repeat center/contain;
+            mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 122 84'%3E%3Cpath fill-rule='evenodd' d='M22 14H100V62H22Z M10 28H21V48H10Z M101 28H112V48H101Z M30 61H41V76H30Z M55 61H66V76H55Z M80 61H91V76H80Z M40 30H52V47H40Z M70 30H82V47H70Z'/%3E%3C/svg%3E") no-repeat center/contain;}
+  .tpl-info .rule{height:5px;width:64px;background:var(--rust);border-radius:2px;margin:24px 0 30px;}
+  .tpl-info .intro{color:var(--muted);}
+  .tpl-info b{color:var(--ink);}
+  .tpl-info .em{color:var(--rust);font-style:normal;}
+  .tpl-info ul.points li{color:var(--muted);}
+  .tpl-info ul.points li::before{background:var(--rust);}
+  /* panel kartlari (palet renkli) */
+  .tpl-info .gcard,.tpl-info .irow,.tpl-info .fcard{background:var(--inner);border:1px solid var(--line);border-radius:12px;}
+  .tpl-info .gcard.hl{border-color:var(--rust);background:color-mix(in srgb,var(--rust) 12%,var(--card));}
+  .tpl-info .gcard .gdesc,.tpl-info .irow .it2,.tpl-info .fcard .fdesc{color:var(--ink);}
+  .tpl-info .code{color:var(--rust);background:color-mix(in srgb,var(--rust) 14%,var(--card));border-color:color-mix(in srgb,var(--rust) 32%,var(--card));}
+  .tpl-info .chip{color:var(--rust);background:color-mix(in srgb,var(--rust) 14%,var(--card));border-color:color-mix(in srgb,var(--rust) 32%,var(--card));}
+  /* mac-stili baslikli kod blogu (palet renkli) */
+  .tpl-info .codeblock{background:color-mix(in srgb,var(--ink) 6%,var(--card));border:1px solid var(--line);border-radius:14px;
+    padding:64px 30px 26px;color:var(--ink);position:relative;}
+  .tpl-info .codeblock::before{content:"";position:absolute;top:0;left:0;right:0;height:46px;
+    background:var(--tan);border-bottom:1px solid var(--line);border-radius:14px 14px 0 0;}
+  .tpl-info .codeblock::after{content:"";position:absolute;top:18px;left:24px;width:13px;height:13px;border-radius:50%;
+    background:#ff5f56;box-shadow:24px 0 0 #ffbd2e,48px 0 0 #27c93f;}
+  .tpl-info .codeblock .cline{color:var(--ink);}
+  .tpl-info .codeblock .cline::before{color:var(--rust);opacity:.9;}
+  .tpl-info .codeblock .ar{color:var(--rust);}
+  /* callout */
+  .tpl-info .callout{background:var(--inner);border-left:6px solid var(--rust);border-radius:10px;color:var(--muted);}
+  /* kapak */
+  .tpl-info .card.cover{padding:150px 56px 70px;justify-content:center;}
+  .tpl-info .card.cover .title{font-size:112px;}
+  .tpl-info .starburst{color:var(--rust);}
+  .tpl-info .card.cover .sub{color:var(--rust);}
 </style>
 </head>
 <body>
@@ -289,7 +358,7 @@
     window.__palettes=Object.keys(PALETTES);
 
     // --- Template (yerlesim derisi) ---
-    const TPLS={editorial:'',bold:'tpl-bold',minimal:'tpl-minimal',scrapbook:'tpl-scrap',terminal:'tpl-term'};
+    const TPLS={editorial:'',bold:'tpl-bold',minimal:'tpl-minimal',scrapbook:'tpl-scrap',terminal:'tpl-term',infocard:'tpl-info'};
     function setTemplate(name){document.body.className=TPLS[name]||'';}
     window.__setTemplate=setTemplate;
 

@@ -370,11 +370,15 @@
           <select id="dTpl">
             <option value="editorial">📰 Editorial</option><option value="bold">🅱️ Bold</option>
             <option value="minimal">◻️ Minimal</option><option value="scrapbook">✂️ Scrapbook</option>
-            <option value="terminal">⌨️ Terminal</option>
+            <option value="terminal">⌨️ Terminal</option><option value="infocard">🪪 Bilgi Kartı</option>
           </select></div>
       </div>
       <div class="field"><label data-i18n="def_palette">Varsayilan palet</label>
         <div class="pals" id="dPals"></div></div>
+      <label class="deeptoggle" style="display:flex;align-items:center;gap:10px;margin-top:18px;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:600;color:var(--ink)">
+        <input type="checkbox" id="dDeep" style="width:18px;height:18px;accent-color:var(--rust);cursor:pointer">
+        <span data-i18n-html="def_deep_label">🔬 Derin araştırma varsayılan açık <span style="color:var(--ink-soft);font-weight:400">— stüdyo açıldığında işaretli gelsin</span></span>
+      </label>
       <div class="row" style="margin-top:24px">
         <button class="btn" onclick="saveDefaults()" data-i18n="def_save">Varsayilanlari Kaydet</button>
       </div>
@@ -475,6 +479,7 @@ const I18N={
   x_save:`X Anahtarlarini Kaydet`, x_test:`Baglantiyi Test Et`,
   def_title:`Varsayilanlar`, def_hint:`Stüdyo (ana sayfa) acildiginda bu secimler hazir gelir.`,
   def_lang:`Varsayilan dil`, def_steps:`Adim`, def_template:`Varsayilan sablon`, def_palette:`Varsayilan palet`, def_save:`Varsayilanlari Kaydet`,
+  def_deep_label:`🔬 Derin araştırma varsayılan açık <span style="color:var(--ink-soft);font-weight:400">— stüdyo açıldığında işaretli gelsin</span>`,
   cards_word:`kart`, gen_generated:`üretildi`, ready:`hazir`,
   empty_lib:`Henüz seri yok. <b>Stüdyo</b>'dan ilk kartlarini üret.`,
   lib_open:`Aç`, lib_zip:`ZIP`, lib_del:`Sil`,
@@ -555,6 +560,7 @@ const I18N={
   x_save:`Save X Keys`, x_test:`Test Connection`,
   def_title:`Defaults`, def_hint:`These selections are preloaded when Studio (home) opens.`,
   def_lang:`Default language`, def_steps:`Steps`, def_template:`Default template`, def_palette:`Default palette`, def_save:`Save Defaults`,
+  def_deep_label:`🔬 Deep research on by default <span style="color:var(--ink-soft);font-weight:400">— pre-checked when the studio opens</span>`,
   cards_word:`cards`, gen_generated:`generated`, ready:`ready`,
   empty_lib:`No series yet. Generate your first cards from <b>Studio</b>.`,
   lib_open:`Open`, lib_zip:`ZIP`, lib_del:`Delete`,
@@ -729,13 +735,15 @@ async function loadSettings(){
   _xReady=d.xConfigured;
   applyStatusI18n();
   // varsayilanlari hem Studio'ya hem Ayarlar formuna uygula
-  const def=d.defaults||{lang:'tr',steps:8,template:'editorial',palette:'kraft'};
+  const def=d.defaults||{lang:'tr',steps:8,template:'editorial',palette:'kraft',deep:true};
   _palette=def.palette; _template=def.template;
   const ls=document.getElementById('lang'); if(ls)ls.value=def.lang;
   const ss=document.getElementById('steps'); if(ss)ss.value=def.steps;
+  const dp=document.getElementById('deep'); if(dp)dp.checked=def.deep!==false;
   if(typeof renderPals==='function')renderPals();
   if(typeof renderTpls==='function')renderTpls();
   ['dLang','dSteps','dTpl'].forEach((id,k)=>{const e=document.getElementById(id);if(e)e.value=[def.lang,def.steps,def.template][k];});
+  const dd=document.getElementById('dDeep'); if(dd)dd.checked=def.deep!==false;
   _dPal=def.palette; if(typeof renderDPals==='function')renderDPals();
 }
 let _dPal='kraft';
@@ -748,7 +756,7 @@ function renderDPals(){
 }
 function pickDPal(k){_dPal=k;renderDPals();}
 async function saveDefaults(){
-  const defaults={lang:val('dLang'),steps:val('dSteps'),template:val('dTpl'),palette:_dPal};
+  const defaults={lang:val('dLang'),steps:val('dSteps'),template:val('dTpl'),palette:_dPal,deep:document.getElementById('dDeep').checked};
   await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({defaults})});
   await loadSettings();
   const st=document.getElementById('defStatus');st.textContent='Varsayilanlar kaydedildi. Stüdyo bunlarla acilacak.';st.className='status ok';
@@ -927,7 +935,7 @@ function pickPal(k){_palette=k;renderPals();}
 renderPals();
 
 // --- Template secici ---
-const TPL_INFO={editorial:['📰','Editorial'],bold:['🅱️','Bold'],minimal:['◻️','Minimal'],scrapbook:['✂️','Scrapbook'],terminal:['⌨️','Terminal']};
+const TPL_INFO={editorial:['📰','Editorial'],bold:['🅱️','Bold'],minimal:['◻️','Minimal'],scrapbook:['✂️','Scrapbook'],terminal:['⌨️','Terminal'],infocard:['🪪','Bilgi Kartı']};
 let _template='editorial';
 function renderTpls(){
   document.getElementById('tpls').innerHTML=Object.entries(TPL_INFO).map(([k,[ic,nm]])=>
