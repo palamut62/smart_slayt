@@ -48,6 +48,9 @@
 ## Features
 
 - 🧠 **LLM content generation** — describe a topic, get a structured multi-slide deck (cover, steps, callouts) via **OpenRouter** or the **Codex CLI** provider, with automatic fallback between them.
+- 🔎 **Multi-angle research** — before writing, the topic is researched in parallel across five intents — **YENI** (newest/changelog), **POPULER** (most-used), **IPUCU** (pro tips), **HATA** (common mistakes), **ILGINC** (surprising facts) — so cards stay concrete and well-rounded.
+- 🗓️ **Recency-aware** — today's date is injected into every prompt so the model prioritizes the *last 6–12 months* (latest version, release notes, new features) instead of stale training data.
+- ✅ **Fact-check pass** — a verification step cross-checks factual claims (versions, prices, commands, dates) against the research brief and corrects or softens unsupported ones, while preserving the JSON schema and copy.
 - 🖼️ **Pixel-perfect rendering** — fixed HTML/CSS template rendered to **1080×1350 PNG** at 2× device scale via Playwright/Chromium. Text never blurs or misspells.
 - 🎨 **5 templates × 7 palettes** — `editorial · bold · minimal · scrapbook · terminal` themes; `kraft · forest · midnight · blush · ocean · sunset · noir` color palettes.
 - 🌍 **Multi-language** — `tr · en · de · fr · es · it · ru · ar`, with locale-aware uppercase handling.
@@ -76,8 +79,9 @@
                   │
                   ▼
    ┌──────────────────────────────┐
-   │  content.js / codex.js       │  LLM writes slide JSON
-   │  (OpenRouter  ⇄  Codex CLI)  │  (cover, steps, callouts)
+   │  content.js / codex.js       │  ① multi-angle web research
+   │  (OpenRouter  ⇄  Codex CLI)  │  ② LLM writes slide JSON
+   │  recency-aware prompts       │  ③ validate + fact-check pass
    └──────────────┬───────────────┘
                   │ slides[]
                   ▼
@@ -157,7 +161,7 @@ Settings UI rather than by hand.
 | `apiKey`            | OpenRouter API key                                   | —                            |
 | `provider`          | `openrouter` or `codex`                              | `openrouter`                 |
 | `model`             | Content model (OpenRouter)                           | `deepseek/deepseek-v4-pro`   |
-| `researchModel`     | Optional research/deep model                         | `perplexity/sonar`           |
+| `researchModel`     | Optional research/deep model (multi-angle + brief)   | `perplexity/sonar-pro`       |
 | `codexModel`        | Model used by the Codex CLI provider                 | —                            |
 | `x.appKey` …        | X/Twitter API credentials (4 fields)                 | —                            |
 | `defaults.lang`     | `tr · en · de · fr · es · it · ru · ar`              | `tr`                         |
