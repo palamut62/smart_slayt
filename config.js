@@ -6,6 +6,11 @@ import { dirname, resolve } from "path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = resolve(__dirname, "config.json");
 
+// Tek kaynak: palet / template / dil listeleri (template.html + server.js senkron kalsin)
+export const PALETTES = ["kraft", "forest", "midnight", "blush", "ocean", "sunset", "noir"];
+export const TEMPLATES = ["editorial", "bold", "minimal", "scrapbook", "terminal"];
+export const LANG_CODES = ["tr", "en", "de", "fr", "es", "it", "ru", "ar"];
+
 export function loadConfig() {
   try {
     return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));

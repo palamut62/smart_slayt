@@ -233,6 +233,19 @@
     // Bu yuzden adaylari deneyip GERCEKTEN sigan (dikey+yatay) en buyugu seceriz.
     function fitBody(){
       const card=document.querySelector('.card'); if(!card)return;
+      // KAPAK: govde yok; uzun basliklar (ozellikle bold 128px) karttan tasabilir.
+      // Baslik karta sigana kadar font boyutunu kademeli kucult.
+      if(card.classList.contains('cover')){
+        const title=card.querySelector('.title'); if(!title)return;
+        const avail=title.clientWidth; // padding-box genisligi
+        title.style.fontSize=''; // tema varsayilanindan basla
+        let size=parseFloat(getComputedStyle(title).fontSize);
+        // scrollWidth > clientWidth => yatayda tasma var
+        for(let guard=0; guard<60 && title.scrollWidth>avail+1 && size>24; guard++){
+          size-=4; title.style.fontSize=size+'px';
+        }
+        return;
+      }
       const body=card.querySelector('.body'); if(!body)return;
       const inner=body.querySelector('.bodyinner'); if(!inner)return;
       const apply=(s)=>{

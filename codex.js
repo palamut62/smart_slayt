@@ -17,7 +17,9 @@ const TIMEOUT_MS = 240000; // 4 dk: web arastirma + uretim
 export async function codexStatus() {
   let version = "";
   try {
-    const { stdout } = await execFileP(CODEX_BIN, ["--version"], { timeout: 8000, shell: IS_WIN });
+    // cwd = tmp: proje dizininde calisirsak Windows'ta shell+PATHEXT, bizim "codex.js"
+    // dosyamizi gercek "codex" komutundan once bulup WSH ile acmaya calisir ("birlikte ac" .js diyalogu).
+    const { stdout } = await execFileP(CODEX_BIN, ["--version"], { timeout: 8000, shell: IS_WIN, cwd: os.tmpdir() });
     version = (stdout || "").trim();
   } catch {
     return { ok: false, message: "Codex CLI bulunamadi. `npm i -g @openai/codex` ile kurun." };
@@ -48,8 +50,16 @@ export async function generateSlidesViaCodex({ topic, steps = 8, lang = "tr", de
   const total = steps + 1;
 
   // Codex kendi arastirmasini yapacak: brief yerine self-research direktifi ver.
+  const today = new Date().toISOString().slice(0, 10);
   const researchDirective =
 `Bu kartlari uretmeden ONCE \`web_search\` araci ile konuyu KAPSAMLI arastir ve GUNCEL, gercek, dogrulanmis bilgi topla.
+BUGUN: ${today}. Konu hizla degisiyor olabilir; SON 6-12 AYDAKI degisikliklere oncelik ver (son surum/changelog/yeni ozellik).
+Su ACILARIN HEPSINI ayri ayri arastir ve kartlara yedir:
+- YENI: en yeni ozellikler, son surum/release notes (tarih + surum no ile).
+- POPULER: en cok kullanilan/populer ozellikler ve neden tercih edildigi.
+- IPUCU: pro ipuclari, best practice, az bilinen ama guclu ozellikler ("nasil daha iyi kullanilir").
+- HATA: sik yapilan hatalar/tuzaklar ve nasil kacinilacagi.
+- ILGINC: dikkat cekici/sasirtici gercek veya istatistik (kapak ve callout'lari guclendir).
 Resmi kaynaklari esas al (ureticinin sitesi, resmi docs, GitHub deposu, npm/pypi). Blog/SEO/aggregator'a guvenme.
 Kurulum komutunu ve gercek komutlari resmi dokumandan dogrula. Uydurma; emin olmadigin detayi atla.${deep ? "\nHER ana basligi ayri ayri, derinlemesine arastir (cok sayida arama yap)." : ""}`;
 

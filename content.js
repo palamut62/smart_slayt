@@ -2,6 +2,12 @@
 // Cikti: zengin blok semasi. 1. eleman kapak, sonrakiler adim kartlari.
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4.5";
+const DEFAULT_RESEARCH_MODEL = "perplexity/sonar-pro"; // daha derin/taze kaynak
+
+// Bugunun tarihi: model "guncel" derken egitim kesimini sanmasin, son degisikliklere odaklansin.
+const TODAY = new Date().toISOString().slice(0, 10);
+const RECENCY = `BUGUN: ${TODAY}. Konu HIZLA degisiyor olabilir; SON 6-12 AYDAKI degisikliklere oncelik ver: ` +
+  `en yeni surum/changelog/release notes, yeni eklenen ozellikler, kaldirilan/degisen seyler. Eski/eskimis bilgiyi guncelle.`;
 
 export const SYSTEM = `Sen Instagram/Twitter icin Turkce "carousel bilgi karti" serileri yazan uzman bir icerik tasarimcisisin.
 Verilen KONU icin AKICI, VURUCU, SOMUT ve GUNCEL bir slayt serisi uretirsin.
@@ -71,6 +77,7 @@ export const LANGS = {
 // brief: arastirma metni (OpenRouter) veya self-research direktifi (Codex).
 export function buildUserMsg({ topic, steps, total, langName, brief }) {
   return `KONU: ${topic}
+BUGUN: ${TODAY} — Kartlar GUNCEL olmali. Mumkunse en yeni surum/ozellik/changelog bilgisini one cikar; eskimis detay verme.
 ADIM SAYISI: ${steps} (kapak haric) · TOPLAM SLAYT: ${total} · page = "X/${total}" (kapak haric)
 DIL: TUM metinleri "${langName}" dilinde yaz (tipografi isaretleri * _ \` aynen kalsin).
 
@@ -84,6 +91,12 @@ ARAC/UYGULAMA/KUTUPHANE ISE — KARTLAR SOMUT VE YONLENDIRICI OLSUN (zorunlu kap
 - Bir kart "Onemli Komutlar / Ilk Kullanim": gercek komutlari code blogu veya bullet+\`backtick\` ile, ne ise yaradigi kisa aciklamayla.
 - Platform/gereksinim (Windows/Mac/Linux, surum), varsa fiyat/plan, gercek entegrasyonlar ve resmi dokuman linki kartlara dagilsin.
 - Kullanici karti okuyunca "nereden alirim, nasil kurarim, ilk komutum ne" sorularinin yanitini bulmali. Soyut laf degil, uygulanabilir adim ver.
+
+GUNCELLIK & ILGI (brifteki "=== ACILAR ===" bolumunu KULLAN):
+- Mumkunse bir kart "En Yeni / Son Degisiklikler" olsun (YENI acisindan: son surum, yeni ozellik, changelog — tarih/surum ile).
+- En cok kullanilan/populer ozellikleri ve pro ipuclarini (POPULER/IPUCU) kartlara yedir; "nasil daha iyi kullanilir" somut olsun.
+- Kapak ve callout'lari ILGINC acisindaki sasirtici gercek/istatistikle guclendir; genel-gecer laf etme.
+- Sik hatalar (HATA) bir kartta veya callout'larda uyari olarak yer alsin.
 
 KAPSAM (cok onemli — eksik birakma, konuyu DOYURUCU isle):
 - Brifteki KAPSANACAK_BASLIKLAR listesini adimlara dagit; HER ana basligi bir kart yap. Konu disi sey ekleme.
@@ -173,20 +186,21 @@ PLATFORM/FIYAT: <...>
 KAPSANACAK_BASLIKLAR: <6-9 alt-baslik>
 Sadece gercekten hicbir kaynakta olmayan detay icin "bilinmiyor" yaz.`;
 
-  // Arastirma icin token-verimli web-tabanli model; biçimlendirmeyi ana model yapar
-  const rModel = researchModel || process.env.OR_RESEARCH_MODEL || "perplexity/sonar";
-  const userQ = `Konu: "${topic}". Once dogru ureticiyi ve resmi kaynagi tespit et, sonra OZ ve net bir brif ver (kisa tut).`;
+  // Arastirma icin web-tabanli model; biçimlendirmeyi ana model yapar
+  const rModel = researchModel || process.env.OR_RESEARCH_MODEL || DEFAULT_RESEARCH_MODEL;
+  const sysR = `${sys}\n\n${RECENCY}`;
+  const userQ = `Konu: "${topic}". Once dogru ureticiyi ve resmi kaynagi tespit et, sonra OZ ve net bir brif ver (kisa tut). ${RECENCY}`;
   try {
     const brief = await callOR({
-      apiKey, model: rModel, web: true, max_results: 6,
-      messages: [{ role: "system", content: sys }, { role: "user", content: userQ }],
+      apiKey, model: rModel, web: true, max_results: 10,
+      messages: [{ role: "system", content: sysR }, { role: "user", content: userQ }],
     });
     if (brief && brief.trim().length > 40) return brief.trim();
   } catch { /* yedege gec */ }
   // Yedek: kullanicinin modeli + web plugin
   const brief2 = await callOR({
-    apiKey, model, web: true, max_results: 6,
-    messages: [{ role: "system", content: sys }, { role: "user", content: userQ }],
+    apiKey, model, web: true, max_results: 10,
+    messages: [{ role: "system", content: sysR }, { role: "user", content: userQ }],
   });
   return (brief2 || "").trim();
 }
@@ -215,37 +229,153 @@ async function deepDive({ topic, sections, apiKey, researchModel }) {
   return parts.filter(Boolean).join("\n\n");
 }
 
-export async function generateSlides({ topic, steps = 8, apiKey, model, researchModel, web = true, lang = "tr", deep = false }) {
+// Model ciktisini guvenli ayikla: ```json fence, bas/son cope karsi dayanikli.
+function extractJson(raw) {
+  let s = (raw || "").replace(/^```(?:json)?\s*|\s*```$/g, "").trim();
+  try { return JSON.parse(s); } catch {}
+  // Govde icinde ilk { ... son } araligini dene (model aciklama eklediyse)
+  const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if (a !== -1 && b > a) { try { return JSON.parse(s.slice(a, b + 1)); } catch {} }
+  return null;
+}
+
+const BLOCK_TYPES = new Set(["bullets", "code", "grid", "iconrows", "filecards"]);
+
+// Slayt dizisini DOGRULA: yapisal hatalari topla (render'i patlatacak seyler).
+// Donus: { ok, errors[] }. Bos/eksik degil, TIP hatalarina odaklanir.
+function validateSlides(slides) {
+  const errors = [];
+  if (!Array.isArray(slides) || slides.length === 0) return { ok: false, errors: ["slides bos veya dizi degil"] };
+  slides.forEach((s, i) => {
+    if (!s || typeof s !== "object") { errors.push(`slide[${i}] obje degil`); return; }
+    if (!s.title || typeof s.title !== "string") errors.push(`slide[${i}].title eksik`);
+    if (i === 0 && s.type !== "cover") errors.push(`slide[0] type 'cover' olmali`);
+    for (const b of s.blocks || []) {
+      if (!b || !BLOCK_TYPES.has(b.type)) { errors.push(`slide[${i}] gecersiz blok tipi: ${b && b.type}`); continue; }
+      if (b.type === "bullets" && !Array.isArray(b.items)) errors.push(`slide[${i}] bullets.items dizi degil`);
+      if ((b.type === "grid" || b.type === "filecards") && !Array.isArray(b.cards)) errors.push(`slide[${i}] ${b.type}.cards dizi degil`);
+      if (b.type === "iconrows" && !Array.isArray(b.rows)) errors.push(`slide[${i}] iconrows.rows dizi degil`);
+      if (b.type === "code" && typeof b.text !== "string") errors.push(`slide[${i}] code.text string degil`);
+    }
+  });
+  return { ok: errors.length === 0, errors };
+}
+
+// Cok-acili arastirma: tek genel sorgu yerine niyet-odakli paralel sorgular.
+// "En yeni + en cok kullanilan + nasil daha iyi kullanilir" uclusunu dogrudan hedefler.
+async function researchAngles({ topic, apiKey, researchModel }) {
+  const rModel = researchModel || process.env.OR_RESEARCH_MODEL || DEFAULT_RESEARCH_MODEL;
+  const ANGLES = [
+    { key: "YENI", q: `"${topic}" konusunda EN YENI ozellikler, son surum/changelog/release notes, son 6-12 ayda eklenen/degisen seyler (tarih + surum no ile).` },
+    { key: "POPULER", q: `"${topic}" icin EN COK KULLANILAN / en populer ozellikler ve gercek kullanim — toplulukta (GitHub, forum, Reddit) one cikanlar neden tercih ediliyor.` },
+    { key: "IPUCU", q: `"${topic}" icin pro ipuclari, best practice, az bilinen ama guclu ozellikler; "nasil daha iyi kullanilir" somut tavsiyeler.` },
+    { key: "HATA", q: `"${topic}" kullanirken sik yapilan hatalar, tuzaklar ve bunlardan nasil kacinilir (somut ornek).` },
+    { key: "ILGINC", q: `"${topic}" hakkinda dikkat cekici/sasirtici gercek, istatistik veya karsi-sezgisel bilgi (kaynakli, abartisiz).` },
+  ];
+  const sys = `Sen titiz bir web arastirmacisisin. ${RECENCY} ` +
+    `Verilen sorgu icin SADECE web aramasindan, dogrulanmis, SOMUT 3-5 madde cikar (gercek isim/sayi/komut/tarih/surum). ` +
+    `Resmi kaynagi esas al. Uydurma; emin degilsen atla. Kisa, madde madde, Turkce.`;
+  const tasks = ANGLES.map((a) =>
+    callOR({
+      apiKey, model: rModel, web: true, max_results: 5,
+      messages: [{ role: "system", content: sys }, { role: "user", content: a.q }],
+    }).then((r) => (r && r.trim() ? `### ${a.key}\n${r.trim()}` : "")).catch(() => "")
+  );
+  const parts = await Promise.all(tasks);
+  return parts.filter(Boolean).join("\n\n");
+}
+
+// Dogrulama pass'i: uretilen kartlardaki olgusal iddialari (surum/fiyat/komut/tarih)
+// brief ile kiyasla, celisen/desteksiz olanlari duzelt veya cikar. Sema korunur.
+async function verifySlides({ slides, brief, topic, apiKey, model }) {
+  const sys = `Sen bir olgu-denetcisisin. Sana bir ARASTIRMA BRIFI ve ondan uretilmis SLAYT JSON'u verilecek.
+GOREV: Sadece OLGUSAL iddialari denetle — surum numaralari, tarihler, fiyat/plan, komutlar, ozellik adlari, istatistikler.
+- Brifle CELISEN veya briffte HIC GECMEYEN ve dogrulanamayan olgulari DUZELT (brife gore) ya da o ifadeyi yumusat/cikar.
+- Uydurma komut/surum/fiyati KALDIR. Genel ifadeleri, uslubu, tipografi isaretlerini (* _ \`) ve JSON SEMASINI AYNEN koru.
+- Icerigi yeniden yazma, kart sayisini/yapisini degistirme. Sadece olgusal duzeltme yap.
+Cikti SADECE gecerli JSON: { "slides": [...] } (ayni sema).`;
+  const user = `KONU: ${topic}\n\nARASTIRMA BRIFI:\n"""\n${(brief || "").slice(0, 8000)}\n"""\n\nDENETLENECEK SLAYTLAR:\n${JSON.stringify({ slides }).slice(0, 12000)}`;
+  const raw = await callOR({
+    apiKey, model, json: true,
+    messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+  });
+  const parsed = extractJson(raw);
+  return parsed && Array.isArray(parsed.slides) ? parsed.slides : null;
+}
+
+export async function generateSlides({ topic, steps = 8, apiKey, model, researchModel, web = true, lang = "tr", deep = false, verify = true, onProgress }) {
   apiKey = apiKey || process.env.OPENROUTER_API_KEY;
   let MODEL = model || process.env.OR_MODEL || DEFAULT_MODEL;
   if (!apiKey) throw new Error("OpenRouter API anahtari ayarli degil. Ayarlar bolumunden ekleyin.");
+  const emit = (phase, info) => { if (onProgress) { try { onProgress(phase, info); } catch {} } };
 
   const langName = LANGS[lang] || lang;
   const total = steps + 1;
 
-  // 1) Arastirma brifi (web)
+  // 1) Arastirma: ana brif (omurga) + cok-acili acilar PARALEL calisir (gecikme ~tek tur).
   let brief = "";
-  if (web) { try { brief = await research({ topic, apiKey, model: MODEL, researchModel }); } catch { brief = ""; } }
+  if (web) {
+    emit("research");
+    const [spine, angles] = await Promise.all([
+      research({ topic, apiKey, model: MODEL, researchModel }).catch(() => ""),
+      researchAngles({ topic, apiKey, researchModel }).catch(() => ""),
+    ]);
+    brief = spine || "";
+    if (angles) brief += `\n\n=== ACILAR (yeni / populer / ipucu / hata / ilginc) ===\n${angles}`;
+  }
 
   // 2) Derin arastirma (opsiyonel): her ana baslik icin paralel alt-ajan
   if (web && deep && brief) {
     try {
       const sections = parseSections(brief);
       if (sections.length) {
+        emit("deep", { sections: sections.length });
         const detail = await deepDive({ topic, sections, apiKey, researchModel });
         if (detail) brief += `\n\n=== DERIN DETAYLAR ===\n${detail}`;
       }
     } catch { /* derin basarisizsa normal brifle devam */ }
   }
 
-  // 2) Brifi karta donustur (genel iskelet ve uydurma YASAK)
+  // 3) Brifi karta donustur (genel iskelet ve uydurma YASAK)
+  emit("writing");
   const userMsg = buildUserMsg({ topic, steps, total, langName, brief });
+  const baseMessages = [{ role: "system", content: SYSTEM }, { role: "user", content: userMsg }];
 
-  const raw = await callOR({
-    apiKey, model: MODEL, json: true,
-    messages: [{ role: "system", content: SYSTEM }, { role: "user", content: userMsg }],
-  });
-  const clean = (raw || "{}").replace(/^```json\s*|\s*```$/g, "").trim();
-  const parsed = JSON.parse(clean);
-  return parsed.slides || [];
+  const raw = await callOR({ apiKey, model: MODEL, json: true, messages: baseMessages });
+  let parsed = extractJson(raw);
+  let slides = parsed && parsed.slides;
+  let check = validateSlides(slides);
+
+  // Gecersizse: modele HATALARI gosterip TEK seferlik duzeltme iste (uretimi patlatma).
+  if (!check.ok) {
+    emit("repair", { errors: check.errors.slice(0, 5) });
+    const repairMsg = `Onceki JSON ciktisi gecersiz/eksikti. Sorunlar:\n- ${check.errors.join("\n- ")}\n\n` +
+      `AYNI semaya birebir uyan, GECERLI JSON'u bastan ver (sadece JSON, aciklama yok). ` +
+      `slides dizisi olmali; her slide.title string; blok tipleri yalniz: bullets/code/grid/iconrows/filecards.`;
+    const raw2 = await callOR({
+      apiKey, model: MODEL, json: true,
+      messages: [...baseMessages, { role: "assistant", content: (raw || "").slice(0, 4000) }, { role: "user", content: repairMsg }],
+    });
+    const parsed2 = extractJson(raw2);
+    const slides2 = parsed2 && parsed2.slides;
+    const check2 = validateSlides(slides2);
+    if (check2.ok) { slides = slides2; check = check2; }
+    else if (Array.isArray(slides2) && slides2.length >= (Array.isArray(slides) ? slides.length : 0)) { slides = slides2; }
+  }
+
+  if (!Array.isArray(slides) || slides.length === 0) {
+    throw new Error("Model gecerli slayt uretemedi. Tekrar deneyin veya farkli bir model secin.");
+  }
+
+  // 4) Dogrulama pass'i: olgusal iddialari (surum/fiyat/komut/tarih) brifle kiyasla.
+  // Sadece brief varsa anlamli; gecersiz/bozuk donerse sessizce orijinali koru.
+  if (verify && brief && brief.trim().length > 40) {
+    try {
+      emit("verify");
+      const checked = await verifySlides({ slides, brief, topic, apiKey, model: MODEL });
+      if (checked && validateSlides(checked).ok && checked.length >= slides.length - 1) slides = checked;
+    } catch { /* dogrulama basarisizsa orijinal kartlarla devam */ }
+  }
+
+  return slides;
 }

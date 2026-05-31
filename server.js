@@ -1,13 +1,12 @@
 import express from "express";
-import { createRequire } from "module";
 import { fileURLToPath } from "url";
-const archiver = createRequire(import.meta.url)("archiver");
+import { ZipArchive } from "archiver"; // archiver v8: named export, eski archiver("zip") yok
 import { dirname, resolve } from "path";
 import fs from "fs";
-import { loadConfig, saveConfig, maskKey } from "./config.js";
+import { loadConfig, saveConfig, maskKey, PALETTES, TEMPLATES, LANG_CODES } from "./config.js";
 import { generateSlides } from "./content.js";
 import { generateSlidesViaCodex, codexStatus } from "./codex.js";
-import { renderSlides } from "./render.js";
+import { renderSlides, closeBrowser } from "./render.js";
 import { createSet, listSets, getSet, deleteSet } from "./db.js";
 import { testX, shareToX } from "./x.js";
 import { attachLogos } from "./logos.js";
@@ -55,14 +54,11 @@ app.post("/api/settings", (req, res) => {
   if (typeof codexModel === "string") patch.codexModel = codexModel.trim();
   if (defaults && typeof defaults === "object") {
     const cur = loadConfig().defaults || {};
-    const PAL = ["kraft","forest","midnight","blush","ocean","sunset","noir"];
-    const TPL = ["editorial","bold","minimal","scrapbook","terminal"];
-    const LNG = ["tr","en","de","fr","es","it","ru","ar"];
     patch.defaults = {
-      lang: LNG.includes(defaults.lang) ? defaults.lang : (cur.lang || "tr"),
+      lang: LANG_CODES.includes(defaults.lang) ? defaults.lang : (cur.lang || "tr"),
       steps: Math.max(1, Math.min(15, parseInt(defaults.steps, 10) || cur.steps || 8)),
-      template: TPL.includes(defaults.template) ? defaults.template : (cur.template || "editorial"),
-      palette: PAL.includes(defaults.palette) ? defaults.palette : (cur.palette || "kraft"),
+      template: TEMPLATES.includes(defaults.template) ? defaults.template : (cur.template || "editorial"),
+      palette: PALETTES.includes(defaults.palette) ? defaults.palette : (cur.palette || "kraft"),
     };
   }
   if (x && typeof x === "object") {
@@ -120,52 +116,68 @@ app.post("/api/codex/test", async (req, res) => {
   } catch (e) { res.json({ ok: false, message: e.message }); }
 });
 
-// --- Uretim ---
+// --- Uretim (NDJSON akisi: ilerleme satirlari + son 'done'/'error' satiri) ---
 app.post("/api/generate", async (req, res) => {
+  const { topic, steps, lang, palette, template, deep } = req.body || {};
+  const pal = PALETTES.includes(palette) ? palette : "kraft";
+  const tpl = TEMPLATES.includes(template) ? template : "editorial";
+  const lng = LANG_CODES.includes(lang) ? lang : "tr";
+
+  // Akis basligi: her satir tek bir JSON olay. Hata bile olsa 200 ile akar.
+  res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache");
+  const send = (obj) => { try { res.write(JSON.stringify(obj) + "\n"); } catch {} };
+
   try {
-    const { topic, steps, lang, palette, template, deep } = req.body || {};
-    const PAL = ["kraft","forest","midnight","blush","ocean","sunset","noir"];
-    const pal = PAL.includes(palette) ? palette : "kraft";
-    const TPL = ["editorial","bold","minimal","scrapbook","terminal"];
-    const tpl = TPL.includes(template) ? template : "editorial";
-    if (!topic || !topic.trim()) return res.status(400).json({ error: "Konu bos olamaz." });
+    if (!topic || !topic.trim()) { send({ type: "error", error: "Konu bos olamaz." }); return res.end(); }
     const cfg = loadConfig();
     const provider = cfg.provider === "codex" ? "codex" : "openrouter";
     const n = Math.max(1, Math.min(15, parseInt(steps, 10) || 8));
-
     const t = topic.trim();
-    const viaOpenRouter = () => generateSlides({ topic: t, steps: n, apiKey: cfg.apiKey, model: cfg.model, researchModel: cfg.researchModel, lang: lang || "tr", deep: !!deep });
 
+    // content.js fazlarini istemciye ilet
+    const onPhase = (phase, info) => send({ type: "progress", stage: phase, ...(info || {}) });
+    const viaOpenRouter = () => generateSlides({ topic: t, steps: n, apiKey: cfg.apiKey, model: cfg.model, researchModel: cfg.researchModel, lang: lng, deep: !!deep, onProgress: onPhase });
+
+    send({ type: "progress", stage: "start" });
     let slides, usedProvider = provider, warning = "";
     if (provider === "codex") {
       const st = await codexStatus();
       if (st.ok) {
         try {
-          slides = await generateSlidesViaCodex({ topic: t, steps: n, lang: lang || "tr", deep: !!deep, model: cfg.codexModel });
+          send({ type: "progress", stage: "writing" });
+          slides = await generateSlidesViaCodex({ topic: t, steps: n, lang: lng, deep: !!deep, model: cfg.codexModel });
         } catch (e) {
-          // Codex calisma aninda hata verdi → OpenRouter'a dus (varsa)
           if (cfg.apiKey) { slides = await viaOpenRouter(); usedProvider = "openrouter"; warning = `Codex hatasi: ${e.message} — OpenRouter ile uretildi.`; }
           else throw new Error(`Codex hatasi: ${e.message} (OpenRouter anahtari da yok).`);
         }
       } else if (cfg.apiKey) {
-        // Codex baglanamadi → OpenRouter'a dus
         slides = await viaOpenRouter(); usedProvider = "openrouter"; warning = `${st.message} — OpenRouter'a gecildi.`;
       } else {
-        return res.status(400).json({ error: `${st.message} OpenRouter anahtari da yok; Ayarlar'dan birini yapilandirin.` });
+        send({ type: "error", error: `${st.message} OpenRouter anahtari da yok; Ayarlar'dan birini yapilandirin.` });
+        return res.end();
       }
     } else {
-      if (!cfg.apiKey) return res.status(400).json({ error: "Once Ayarlar'dan API anahtari ekleyin." });
+      if (!cfg.apiKey) { send({ type: "error", error: "Once Ayarlar'dan API anahtari ekleyin." }); return res.end(); }
       slides = await viaOpenRouter();
     }
+
     const stamp = Date.now();
     const setDir = resolve(OUT, String(stamp));
+    send({ type: "progress", stage: "logos" });
     await attachLogos(slides, setDir);          // konuyla ilgili logolari webden indir
-    const files = await renderSlides(slides, setDir, pal, tpl, lang || "tr");
+    const files = await renderSlides(slides, setDir, pal, tpl, lng,
+      (done, tot) => send({ type: "progress", stage: "render", done, total: tot }));
     const cards = files.map((f) => ({ name: f.name, url: `/out/${stamp}/${f.name}` }));
     const modelLabel = usedProvider === "codex" ? `codex${cfg.codexModel ? " · " + cfg.codexModel : ""}` : cfg.model;
-    const set = createSet({ topic: topic.trim(), model: modelLabel, steps: n, slides, cards });
-    res.json({ ...set, provider: usedProvider, warning });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const set = createSet({ topic: t, model: modelLabel, steps: n, slides, cards });
+    send({ type: "done", ...set, provider: usedProvider, warning });
+    res.end();
+  } catch (e) {
+    logErr("generate", e);
+    send({ type: "error", error: e.message });
+    res.end();
+  }
 });
 
 // --- Kutuphane ---
@@ -183,15 +195,26 @@ app.get("/api/sets/:id/zip", (req, res) => {
   if (!s) return res.status(404).send("Bulunamadi.");
   const safe = s.topic.replace(/[^a-z0-9]+/gi, "-").slice(0, 40).replace(/^-|-$/g, "") || "kartlar";
   res.attachment(`${safe}.zip`);
-  const archive = archiver("zip", { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   archive.on("error", (err) => res.status(500).send(err.message));
   archive.pipe(res);
   s.cards.forEach((c) => {
     const fp = resolve(__dirname, c.url.replace(/^\//, ""));
-    if (fs.existsSync(fp)) archive.file(fp, { name: c.filename });
+    if (fs.existsSync(fp)) archive.file(fp, { name: c.filename || c.name });
   });
   archive.finalize();
 });
 
 const PORT = process.env.PORT || 5179;
-app.listen(PORT, () => console.log(`\n  smart_slayt arayuzu hazir:  http://localhost:${PORT}\n`));
+const server = app.listen(PORT, () => console.log(`\n  smart_slayt arayuzu hazir:  http://localhost:${PORT}\n`));
+
+// Duzgun kapanis: Playwright tarayicisini birak, sonra cik
+let _shuttingDown = false;
+async function shutdown(sig) {
+  if (_shuttingDown) return; _shuttingDown = true;
+  try { await closeBrowser(); } catch {}
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 3000).unref();
+}
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
