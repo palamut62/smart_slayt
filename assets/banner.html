@@ -9,6 +9,7 @@
     --rust:#B5482E; --rust-soft:#C56A4F;
     --ink:#231E19; --muted:#8d7d6a; --tan:#ECDDC8; --line:#E0D0B8;
     --green:#3f7a4f; --blue:#3a5a8c; --purple:#6a4f8c;
+    --app-paper:#EFE3D2; --app-sidebar:#241E18; --app-cardbg:#F8F1E6; --app-field:#fffdf9; --app-line:#d8c5aa; --app-soft:#5b4f42;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Archivo',sans-serif;color:var(--ink);}
@@ -52,28 +53,36 @@
   /* RIGHT — laptop + poster */
   .right{position:relative;}
   .laptop{position:absolute;top:34px;left:8px;width:760px;}
-  .screen{background:#fff;border:14px solid #2c2c30;border-radius:18px 18px 0 0;height:430px;overflow:hidden;box-shadow:0 24px 50px rgba(0,0,0,.18);}
+  .screen{background:#fff;border:14px solid #2c2c30;border-radius:18px 18px 0 0;height:470px;overflow:hidden;box-shadow:0 24px 50px rgba(0,0,0,.18);}
   .base{height:18px;background:#3a3a40;border-radius:0 0 16px 16px;width:820px;margin-left:-44px;position:relative;}
   .base:after{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:7px;background:#26262a;border-radius:0 0 8px 8px;}
-  .app{display:grid;grid-template-columns:150px 1fr;height:100%;font-size:13px;}
-  .rail{background:var(--card);border-right:1px solid var(--line);padding:14px 12px;}
-  .rail .brandmini{display:flex;align-items:center;gap:8px;font-weight:900;font-size:16px;margin-bottom:18px;}
-  .rail .brandmini i{width:20px;height:20px;border-radius:6px;background:var(--rust);display:inline-block;}
-  .rail .nav{display:flex;flex-direction:column;gap:6px;}
-  .rail .nav a{padding:9px 12px;border-radius:9px;font-weight:700;color:var(--ink);opacity:.7;}
-  .rail .nav a.on{background:color-mix(in srgb,var(--rust) 12%,var(--card));color:var(--rust);opacity:1;}
-  .main{padding:18px 20px;background:#fff;}
-  .main h3{font-size:18px;font-weight:900;}
-  .main .lead{color:var(--muted);font-size:12px;margin:2px 0 14px;}
-  .choice{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .ch{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;align-items:center;gap:10px;}
-  .ch i{width:30px;height:30px;border-radius:8px;display:block;}
-  .ch.r i{background:color-mix(in srgb,var(--rust) 18%,#fff);} .ch.g i{background:color-mix(in srgb,var(--green) 18%,#fff);}
-  .ch .ct{font-weight:800;font-size:14px;} .ch .cs{font-size:11px;color:var(--muted);}
-  .recent{font-size:12px;font-weight:800;color:var(--ink);margin:16px 0 8px;opacity:.8;}
-  .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-  .thumb{height:70px;border:1px solid var(--line);border-radius:10px;background:var(--inner);display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:8px;}
-  .thumb span{background:color-mix(in srgb,var(--rust) 14%,#fff);border-radius:3px;}
+  /* gercek uygulama arayuzu (Studyo) */
+  .app{display:grid;grid-template-columns:172px 1fr;height:100%;font-size:13px;background:var(--app-paper);}
+  .rail{background:var(--app-sidebar);color:#cdbca6;padding:20px 16px;}
+  .rail .brandmini{font-family:'Fraunces',serif;font-weight:600;font-size:24px;letter-spacing:-.5px;color:#f3e7d6;line-height:1;}
+  .rail .brandmini .d{color:var(--rust);}
+  .rail .brandmini small{display:block;font-family:'Archivo';font-weight:600;font-size:8px;letter-spacing:2.5px;color:#b6a489;margin-top:7px;text-transform:uppercase;}
+  .rail .nav{display:flex;flex-direction:column;gap:5px;margin-top:26px;}
+  .rail .nav a{display:flex;align-items:center;gap:11px;padding:9px 13px;border-radius:11px;font-weight:600;font-size:13px;color:#cdbca6;}
+  .rail .nav a .ic{width:18px;text-align:center;font-size:14px;}
+  .rail .nav a.on{background:var(--rust);color:#fff;}
+  .main{padding:22px 24px;}
+  .main .eyb{font-size:8.5px;font-weight:800;letter-spacing:3px;color:var(--rust);text-transform:uppercase;}
+  .main h3{font-family:'Fraunces',serif;font-weight:600;font-size:25px;line-height:1.04;letter-spacing:-.5px;margin:6px 0 7px;color:var(--ink);}
+  .main h3 em{font-style:italic;color:var(--rust);}
+  .main .lead{color:var(--app-soft);font-size:11px;line-height:1.45;max-width:330px;margin-bottom:14px;}
+  .ppanel{background:var(--app-cardbg);border:1px solid var(--app-line);border-radius:16px;box-shadow:0 14px 30px -18px rgba(60,35,20,.45);padding:16px 18px;}
+  .fl{font-size:8.5px;font-weight:800;letter-spacing:1.5px;color:var(--app-soft);text-transform:uppercase;margin-bottom:6px;}
+  .fi{background:var(--app-field);border:1px solid var(--app-line);border-radius:9px;height:34px;display:flex;align-items:center;padding:0 12px;font-size:12px;color:var(--ink);}
+  .fi .ph{color:#a99a86;}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  .fi.sel{justify-content:space-between;} .fi.sel:after{content:"▾";color:var(--app-soft);font-size:10px;}
+  .swr{display:flex;gap:7px;margin-top:6px;}
+  .sw{width:42px;height:30px;border-radius:7px;border:1px solid var(--app-line);}
+  .sw.on{border:2px solid var(--rust);}
+  .genrow{display:flex;align-items:center;gap:12px;margin-top:14px;}
+  .genbtn{background:var(--rust);color:#fff;font-weight:800;font-size:12px;border-radius:11px;padding:10px 18px;display:inline-flex;align-items:center;gap:7px;}
+  .genhint{font-size:9.5px;color:var(--app-soft);}
 
   .poster{position:absolute;right:-6px;bottom:-6px;width:330px;background:var(--card);border:3px solid var(--rust);border-radius:18px;padding:20px 18px;box-shadow:0 26px 50px rgba(0,0,0,.22);transform:rotate(1.5deg);}
   .poster .ph{text-align:center;border-bottom:1.5px solid var(--line);padding-bottom:10px;margin-bottom:12px;}
@@ -131,26 +140,33 @@
           <div class="screen">
             <div class="app">
               <div class="rail">
-                <div class="brandmini"><i></i> smart_slayt</div>
+                <div class="brandmini">smart<span class="d">.</span>slayt<small>bilgi kartı stüdyosu</small></div>
                 <div class="nav">
-                  <a class="on">▤ Stüdyo</a>
-                  <a>▥ Kütüphane</a>
-                  <a>⚙ Ayarlar</a>
-                  <a>? Yardım</a>
+                  <a class="on"><span class="ic">✦</span> Stüdyo</a>
+                  <a><span class="ic">▤</span> Kütüphane</a>
+                  <a><span class="ic">⚙</span> Ayarlar</a>
+                  <a><span class="ic">?</span> Yardım</a>
                 </div>
               </div>
               <div class="main">
-                <h3>Stüdyo</h3>
-                <div class="lead">Create AI carousels and cheatsheets.</div>
-                <div class="choice">
-                  <div class="ch r"><i></i><div><div class="ct">Carousel</div><div class="cs">Social info-cards</div></div></div>
-                  <div class="ch g"><i></i><div><div class="ct">Cheatsheet</div><div class="cs">One-page reference</div></div></div>
-                </div>
-                <div class="recent">Recent series — Library</div>
-                <div class="thumbs">
-                  <div class="thumb"><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                  <div class="thumb"><span></span><span></span><span></span><span></span><span></span><span></span></div>
-                  <div class="thumb"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="eyb">yeni seri</div>
+                <h3>Bir konu ver,<br><em>akıllı kart</em> serisini al.</h3>
+                <div class="lead">Konunu yaz; uygulama webden güncel verileri araştırıp ikonlu, kod bloklu bilgi kartları olarak tasarlar.</div>
+                <div class="ppanel">
+                  <div class="fl">Konu</div>
+                  <div class="fi"><span class="ph">Ör: Docker best practices</span></div>
+                  <div class="frow">
+                    <div><div class="fl">İçerik türü</div><div class="fi sel">🎠 Carousel / Bilgi Kartı</div></div>
+                    <div><div class="fl">Dil</div><div class="fi sel">🇹🇷 Türkçe</div></div>
+                  </div>
+                  <div class="frow">
+                    <div><div class="fl">Şablon</div><div class="swr"><span class="sw on" style="background:#EFE3D2"></span><span class="sw" style="background:#241E18"></span><span class="sw" style="background:#F8F1E6"></span></div></div>
+                    <div><div class="fl">Renk paleti</div><div class="swr"><span class="sw on" style="background:linear-gradient(135deg,#EFE3D2 50%,#B5482E 50%)"></span><span class="sw" style="background:linear-gradient(135deg,#1d2b24 50%,#C98A3A 50%)"></span><span class="sw" style="background:linear-gradient(135deg,#f3ece0 50%,#3a5a8c 50%)"></span></div></div>
+                  </div>
+                  <div class="genrow">
+                    <span class="genbtn">✦ Kartları Üret</span>
+                    <span class="genhint">web araştırmalı · derin modda ~1-2 dk</span>
+                  </div>
                 </div>
               </div>
             </div>
