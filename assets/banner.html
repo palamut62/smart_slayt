@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Roboto+Mono:wght@500;600;700&display=swap');
+  :root{
+    --cream:#F3E9DA; --card:#F7F0E5; --inner:#FBF6EE;
+    --rust:#B5482E; --rust-soft:#C56A4F;
+    --ink:#231E19; --muted:#8d7d6a; --tan:#ECDDC8; --line:#E0D0B8;
+    --green:#3f7a4f; --blue:#3a5a8c; --purple:#6a4f8c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Archivo',sans-serif;color:var(--ink);}
+  .banner{width:1789px;height:880px;background:var(--cream);position:relative;display:flex;flex-direction:column;}
+  .top{flex:1;display:grid;grid-template-columns:1fr 1.05fr;gap:30px;padding:48px 56px 24px;}
+
+  /* LEFT */
+  .brand{display:flex;align-items:center;gap:18px;}
+  .logo{width:74px;height:74px;border-radius:18px;background:var(--rust);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 6px 16px rgba(181,72,46,.28);}
+  .logo:after{content:"";position:absolute;width:34px;height:26px;border:4px solid #fff;border-radius:5px;}
+  .logo:before{content:"✦";position:absolute;top:8px;right:9px;color:#fff;font-size:15px;}
+  .wordmark{font-size:62px;font-weight:900;letter-spacing:-1px;}
+  .wordmark .u{color:var(--rust);}
+  .divider{display:flex;align-items:center;gap:14px;margin:22px 0 18px;color:var(--rust);opacity:.7;}
+  .divider .ln{height:2px;flex:1;background:linear-gradient(90deg,var(--rust),transparent);max-width:200px;}
+  h1{font-size:74px;line-height:1.02;font-weight:900;letter-spacing:-1.5px;}
+  h1 .it{font-style:italic;color:var(--rust);}
+  .sub{font-size:24px;color:var(--muted);margin:20px 0 26px;max-width:560px;line-height:1.4;}
+  .features{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:640px;}
+  .fc{background:var(--inner);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;}
+  .fc .ico{width:44px;height:44px;border-radius:11px;background:color-mix(in srgb,var(--rust) 14%,var(--card));border:1px solid color-mix(in srgb,var(--rust) 28%,var(--card));display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto;}
+  .fc .ttl{font-size:20px;font-weight:800;color:var(--rust);}
+  .fc .dsc{font-size:14.5px;color:var(--ink);opacity:.78;font-weight:500;margin-top:2px;}
+  .fc.g .ico{background:color-mix(in srgb,var(--green) 14%,var(--card));border-color:color-mix(in srgb,var(--green) 30%,var(--card));} .fc.g .ttl{color:var(--green);}
+  .fc.b .ico{background:color-mix(in srgb,var(--blue) 14%,var(--card));border-color:color-mix(in srgb,var(--blue) 30%,var(--card));} .fc.b .ttl{color:var(--blue);}
+  .fc.p .ico{background:color-mix(in srgb,var(--purple) 14%,var(--card));border-color:color-mix(in srgb,var(--purple) 30%,var(--card));} .fc.p .ttl{color:var(--purple);}
+
+  .codeblock{margin-top:22px;background:var(--inner);border:1px solid var(--line);border-radius:14px;padding:20px 24px;font-family:'Roboto Mono',monospace;font-size:18px;font-weight:600;color:var(--ink);max-width:640px;}
+  .codeblock .cl{position:relative;padding-left:20px;line-height:1.7;}
+  .codeblock .cl:before{content:"$";position:absolute;left:0;color:var(--rust);opacity:.7;}
+  .codeblock .cl.cont:before{content:"";}
+  .codeblock .ar{color:var(--rust);}
+  .codeblock .num{color:var(--muted);margin-right:10px;}
+  .pills{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap;}
+  .pill{font-size:17px;font-weight:800;padding:8px 18px;border-radius:10px;border:1.5px solid var(--line);}
+  .pill.r{color:var(--rust);border-color:color-mix(in srgb,var(--rust) 40%,var(--card));}
+  .pill.g{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,var(--card));}
+  .pill.b{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 40%,var(--card));}
+  .pill.p{color:var(--purple);border-color:color-mix(in srgb,var(--purple) 40%,var(--card));}
+
+  /* RIGHT — laptop + poster */
+  .right{position:relative;}
+  .laptop{position:absolute;top:34px;left:8px;width:760px;}
+  .screen{background:#fff;border:14px solid #2c2c30;border-radius:18px 18px 0 0;height:430px;overflow:hidden;box-shadow:0 24px 50px rgba(0,0,0,.18);}
+  .base{height:18px;background:#3a3a40;border-radius:0 0 16px 16px;width:820px;margin-left:-44px;position:relative;}
+  .base:after{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:7px;background:#26262a;border-radius:0 0 8px 8px;}
+  .app{display:grid;grid-template-columns:150px 1fr;height:100%;font-size:13px;}
+  .rail{background:var(--card);border-right:1px solid var(--line);padding:14px 12px;}
+  .rail .brandmini{display:flex;align-items:center;gap:8px;font-weight:900;font-size:16px;margin-bottom:18px;}
+  .rail .brandmini i{width:20px;height:20px;border-radius:6px;background:var(--rust);display:inline-block;}
+  .rail .nav{display:flex;flex-direction:column;gap:6px;}
+  .rail .nav a{padding:9px 12px;border-radius:9px;font-weight:700;color:var(--ink);opacity:.7;}
+  .rail .nav a.on{background:color-mix(in srgb,var(--rust) 12%,var(--card));color:var(--rust);opacity:1;}
+  .main{padding:18px 20px;background:#fff;}
+  .main h3{font-size:18px;font-weight:900;}
+  .main .lead{color:var(--muted);font-size:12px;margin:2px 0 14px;}
+  .choice{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .ch{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;align-items:center;gap:10px;}
+  .ch i{width:30px;height:30px;border-radius:8px;display:block;}
+  .ch.r i{background:color-mix(in srgb,var(--rust) 18%,#fff);} .ch.g i{background:color-mix(in srgb,var(--green) 18%,#fff);}
+  .ch .ct{font-weight:800;font-size:14px;} .ch .cs{font-size:11px;color:var(--muted);}
+  .recent{font-size:12px;font-weight:800;color:var(--ink);margin:16px 0 8px;opacity:.8;}
+  .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .thumb{height:70px;border:1px solid var(--line);border-radius:10px;background:var(--inner);display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:8px;}
+  .thumb span{background:color-mix(in srgb,var(--rust) 14%,#fff);border-radius:3px;}
+
+  .poster{position:absolute;right:-6px;bottom:-6px;width:330px;background:var(--card);border:3px solid var(--rust);border-radius:18px;padding:20px 18px;box-shadow:0 26px 50px rgba(0,0,0,.22);transform:rotate(1.5deg);}
+  .poster .ph{text-align:center;border-bottom:1.5px solid var(--line);padding-bottom:10px;margin-bottom:12px;}
+  .poster .ph .t{font-size:21px;font-weight:900;}.poster .ph .t .it{font-style:italic;color:var(--rust);}
+  .poster .ph .s{font-size:9px;letter-spacing:1px;color:var(--muted);margin-top:3px;}
+  .pgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .pp{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--inner);}
+  .pp .pn{font-size:10px;font-weight:900;color:var(--rust);}
+  .pp .pt{font-size:9px;font-weight:800;margin:3px 0 5px;line-height:1.2;}
+  .pp .pc{font-family:'Roboto Mono',monospace;font-size:8px;color:var(--rust);background:color-mix(in srgb,var(--rust) 12%,#fff);border-radius:4px;padding:2px 4px;display:inline-block;}
+  .pp .pl{height:5px;background:var(--tan);border-radius:3px;margin-top:4px;}
+
+  /* BOTTOM STRIP */
+  .strip{height:96px;margin:0 32px 22px;background:var(--card);border:1px solid var(--line);border-radius:18px;display:flex;align-items:center;justify-content:space-around;padding:0 30px;}
+  .si{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:800;}
+  .si .b{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff;}
+  .si.s1 .b{background:var(--green);} .si.s2 .b{background:var(--rust);} .si.s3 .b{background:var(--blue);}
+  .si.s4 .b{background:#1d9bf0;} .si.s5 .b{background:#1c1c1e;}
+  .sep{width:1px;height:42px;background:var(--line);}
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="top">
+      <!-- LEFT -->
+      <div class="left">
+        <div class="brand">
+          <div class="logo"></div>
+          <div class="wordmark">smart<span class="u">_slayt</span></div>
+        </div>
+        <div class="divider"><div class="ln"></div>✦<div class="ln" style="transform:scaleX(-1)"></div></div>
+        <h1>AI Carousel &amp;<br><span class="it">Cheatsheet</span> Generator</h1>
+        <p class="sub">Turn ideas into beautiful carousels and cheatsheets in seconds — self-hosted CLI &amp; web app.</p>
+        <div class="features">
+          <div class="fc"><div class="ico">✨</div><div><div class="ttl">AI-Powered</div><div class="dsc">OpenRouter &amp; Codex</div></div></div>
+          <div class="fc g"><div class="ico">▦</div><div><div class="ttl">Carousel &amp; Cheatsheet</div><div class="dsc">Two formats, one flow</div></div></div>
+          <div class="fc p"><div class="ico">🎨</div><div><div class="ttl">5 Templates</div><div class="dsc">Editorial · Bold · Terminal</div></div></div>
+          <div class="fc b"><div class="ico">𝕏</div><div><div class="ttl">Share to X</div><div class="dsc">Tweet or thread</div></div></div>
+        </div>
+        <div class="codeblock">
+          <div class="cl"><span class="num">1</span>node generate.js <span class="ar">"Docker"</span> 8 <span class="ar">\</span></div>
+          <div class="cl cont"><span class="num">2</span>&nbsp;&nbsp;--mode <span class="ar">cheatsheet</span> --cheatsheet-type install-guide</div>
+        </div>
+        <div class="pills">
+          <span class="pill r">Fast</span>
+          <span class="pill b">CLI + Web</span>
+          <span class="pill p">Self-hosted</span>
+          <span class="pill g">Open Source</span>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right">
+        <div class="laptop">
+          <div class="screen">
+            <div class="app">
+              <div class="rail">
+                <div class="brandmini"><i></i> smart_slayt</div>
+                <div class="nav">
+                  <a class="on">▤ Stüdyo</a>
+                  <a>▥ Kütüphane</a>
+                  <a>⚙ Ayarlar</a>
+                  <a>? Yardım</a>
+                </div>
+              </div>
+              <div class="main">
+                <h3>Stüdyo</h3>
+                <div class="lead">Create AI carousels and cheatsheets.</div>
+                <div class="choice">
+                  <div class="ch r"><i></i><div><div class="ct">Carousel</div><div class="cs">Social info-cards</div></div></div>
+                  <div class="ch g"><i></i><div><div class="ct">Cheatsheet</div><div class="cs">One-page reference</div></div></div>
+                </div>
+                <div class="recent">Recent series — Library</div>
+                <div class="thumbs">
+                  <div class="thumb"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                  <div class="thumb"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                  <div class="thumb"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="base"></div>
+        </div>
+
+        <div class="poster">
+          <div class="ph"><div class="t">✦ Docker · <span class="it">Nasıl Kurulur</span> ✦</div><div class="s">KURULUM · KOMUTLAR · SIK HATALAR</div></div>
+          <div class="pgrid">
+            <div class="pp"><div class="pn">01</div><div class="pt">Kurulum</div><div class="pc">get.docker.com</div><div class="pl"></div></div>
+            <div class="pp"><div class="pn">02</div><div class="pt">Temel Komut</div><div class="pc">docker run</div><div class="pl"></div></div>
+            <div class="pp"><div class="pn">03</div><div class="pt">İmaj</div><div class="pc">docker pull</div><div class="pl"></div></div>
+            <div class="pp"><div class="pn">04</div><div class="pt">Listele</div><div class="pc">docker ps -a</div><div class="pl"></div></div>
+            <div class="pp"><div class="pn">05</div><div class="pt">Temizle</div><div class="pc">system prune</div><div class="pl"></div></div>
+            <div class="pp"><div class="pn">06</div><div class="pt">Loglar</div><div class="pc">logs -f</div><div class="pl"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="strip">
+      <div class="si s1"><div class="b">🛡</div> Self-hosted</div>
+      <div class="sep"></div>
+      <div class="si s2"><div class="b">⚡</div> Generate in Seconds</div>
+      <div class="sep"></div>
+      <div class="si s3"><div class="b">⬇</div> Export PNG + ZIP</div>
+      <div class="sep"></div>
+      <div class="si s4"><div class="b">𝕏</div> Share to X</div>
+      <div class="sep"></div>
+      <div class="si s5"><div class="b">⌥</div> Open Source</div>
+    </div>
+  </div>
+</body>
+</html>
