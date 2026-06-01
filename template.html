@@ -120,58 +120,57 @@
   /* Tum bolumler TEK uzun gorselde; baslik + panel izgarasi. Yukseklik icerige gore buyur. */
   html.is-poster,body.is-poster{width:auto;height:auto;min-height:0;}
   body.is-poster{display:block;background:var(--cream);}
-  /* Sabit A4 sayfa (1:1.414). Icerik .poster-inner icine konup sayfaya SIGACAK sekilde olceklenir. */
+  /* Referans gorseldeki sosyal poster orani: 1080x1350, 3 sutun x 4 satir panel. */
   .poster{position:relative;background:var(--card);color:var(--ink);font-family:'Archivo',sans-serif;overflow:hidden;}
-  .poster.port{width:1080px;height:1527px;}
-  .poster.land{width:1527px;height:1080px;}
-  .poster-inner{position:absolute;top:0;left:0;padding:64px 56px 56px;transform-origin:top left;}
-  .poster-head{margin-bottom:30px;text-align:center;}
-  .poster-title{font-family:'Playfair Display',serif;font-size:84px;line-height:1.02;font-weight:900;
+  .poster.port{width:1080px;height:1350px;}
+  .poster.land{width:1350px;height:1080px;}
+  .poster-inner{position:absolute;top:0;left:0;padding:18px 28px 0;transform-origin:top left;}
+  .poster-head{margin-bottom:14px;text-align:center;}
+  .poster-title{font-family:'Playfair Display',serif;font-size:58px;line-height:1.02;font-weight:900;
     letter-spacing:-1px;color:var(--ink);}
   .poster-title .it{color:var(--rust);font-style:italic;} .poster-title .rust{color:var(--rust);}
   .poster-spark{color:var(--rust);font-size:.62em;vertical-align:middle;margin:0 .34em;font-style:normal;}
-  .poster-sub{font-size:25px;color:var(--muted);margin-top:14px;font-weight:700;line-height:1.4;letter-spacing:.3px;}
+  .poster-sub{font-size:16px;color:var(--ink);margin-top:8px;font-weight:700;line-height:1.25;letter-spacing:.1px;}
   .poster-sub .dot{color:var(--rust);margin:0 .35em;font-weight:900;}
-  .poster-rule{height:4px;width:160px;background:var(--rust);border-radius:4px;margin:20px auto 0;opacity:.5;}
-  /* COK-KOLONLU "masonry": her bolum kendi renkli karti; sutunlara dengeli dagilir (referans gibi) */
-  .poster-grid{column-count:3;column-gap:20px;}
+  .poster-rule{height:0;border-top:1.5px dashed var(--line);width:100%;margin:12px auto 0;opacity:1;}
+  /* GERCEK GRID: esit genislikte sutunlar, satir satir dengeli yerlesim (referans gibi) */
+  .poster-grid{display:block;column-count:3;column-gap:10px;}
   .poster.land .poster-grid{column-count:4;}
-  /* break-inside:avoid karti bolunmeden tutar; inline-block KULLANMA (column-span'i bozar) */
   /* Her bolum kendi --acc rengini alir: rozet, baslik, madde ve kod vurgusu o renkte (referans gibi) */
-  .psec{background:var(--card);border:1.5px solid var(--line);border-top:5px solid var(--acc,var(--rust));
-    border-radius:14px;padding:20px 20px;margin:0 0 20px;
-    break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;
+  .psec{background:linear-gradient(180deg,var(--inner),var(--card));border:1.5px solid var(--line);
+    border-radius:10px;padding:12px 12px;margin:0;
     box-shadow:0 2px 0 color-mix(in srgb,var(--acc,var(--rust)) 16%,transparent);}
-  .psec.wide{column-span:all;-webkit-column-span:all;margin-top:4px;}  /* tablolu bolum tum sutunlari kaplar */
-  .psec-h{display:flex;align-items:center;gap:12px;margin-bottom:13px;}
-  .psec-num{font-family:'Playfair Display',serif;font-size:23px;font-weight:900;color:#fff;
-    background:var(--acc,var(--rust));width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;}
-  .psec-t{font-family:'Playfair Display',serif;font-size:30px;font-weight:800;line-height:1.06;color:var(--acc,var(--rust));}
-  .psec-i{font-size:19px;line-height:1.32;opacity:.82;margin-bottom:13px;}
-  .psec-c{margin-top:13px;background:color-mix(in srgb,var(--acc,var(--rust)) 10%,var(--card));
-    border-left:5px solid var(--acc,var(--rust));border-radius:9px;padding:12px 15px;font-size:18px;line-height:1.32;}
-  .poster-foot{margin-top:30px;background:var(--ink);color:var(--card);border-radius:12px;padding:20px;
-    text-align:center;font-family:'Playfair Display',serif;font-size:26px;font-weight:700;letter-spacing:.3px;}
+  .poster .psec{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;margin:0 0 10px;}
+  .psec.wide{grid-column:auto;}
+  .psec-h{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+  .psec-num{font-family:'Playfair Display',serif;font-size:21px;font-weight:900;color:#fff;
+    background:var(--acc,var(--rust));width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;}
+  .psec-t{font-family:'Playfair Display',serif;font-size:24px;font-weight:800;line-height:1.04;color:var(--acc,var(--rust));}
+  .psec-i{font-size:14px;line-height:1.22;opacity:.86;margin-bottom:8px;}
+  .psec-c{margin-top:8px;background:transparent;border-top:1.5px dashed var(--line);
+    border-left:0;border-radius:0;padding:7px 0 0;font-size:13.5px;line-height:1.22;}
+  .poster-foot{margin-top:10px;background:#9B6426;color:var(--card);border-radius:0;padding:11px;
+    text-align:center;font-family:'Playfair Display',serif;font-size:24px;font-weight:800;letter-spacing:.2px;}
   .poster-foot .acc{color:var(--rust);}
   /* panel ici bloklari dar sutuna gore kucult; maddeler bolum renginde */
-  .poster .points{gap:9px;} .poster .points li{font-size:19px;padding-left:28px;line-height:1.3;}
-  .poster .points li::before{top:8px;width:0;height:0;border-radius:0;content:"\2713";color:var(--acc,var(--rust));
-    background:none;font-size:18px;font-weight:900;left:2px;}
-  .poster .codeblock{font-size:18px;padding:14px 16px;margin:0;gap:6px;}
-  .poster .codeblock .cline{padding-left:22px;}
-  .poster .grid2{gap:12px;margin:0;grid-template-columns:1fr;}
-  .poster .gcard{padding:14px 16px;} .poster .gcard .ghead{font-size:22px;margin-bottom:6px;}
-  .poster .gcard .ghead .ic{font-size:22px;} .poster .gcard .gdesc{font-size:18px;}
-  .poster .gcard .glabel{font-size:14px;margin-bottom:6px;}
-  .poster .iconrows{gap:10px;} .poster .irow{padding:12px 14px;gap:12px;}
-  .poster .irow .ic{font-size:32px;width:40px;} .poster .irow .it2{font-size:22px;} .poster .irow .sub{font-size:17px;}
-  .poster .filecards{gap:10px;} .poster .fcard{padding:14px 16px;} .poster .fcard .fhead{font-size:22px;margin-bottom:6px;} .poster .fcard .fdesc{font-size:18px;}
+  .poster .points{gap:5px;} .poster .points li{font-size:14px;padding-left:20px;line-height:1.22;}
+  .poster .points li::before{top:1px;width:0;height:0;border-radius:0;content:"\2713";color:var(--acc,var(--rust));
+    background:none;font-size:14px;font-weight:900;left:1px;}
+  .poster .code{font-size:14px;padding:1px 6px;border-radius:5px;overflow-wrap:anywhere;word-break:break-word;}
+  .poster .codeblock{font-size:12.5px;padding:9px 10px;margin:0;gap:4px;border-radius:7px;}
+  .poster .codeblock .cline{padding-left:17px;line-height:1.2;}
+  .poster .grid2{gap:7px;margin:0;grid-template-columns:1fr;}
+  .poster .gcard{padding:8px 9px;border-radius:8px;} .poster .gcard .ghead{font-size:16px;margin-bottom:4px;gap:6px;}
+  .poster .gcard .ghead .ic{font-size:16px;} .poster .gcard .gdesc{font-size:13px;line-height:1.2;}
+  .poster .gcard .glabel{font-size:10px;margin-bottom:4px;letter-spacing:1.2px;}
+  .poster .iconrows{gap:6px;} .poster .irow{padding:7px 8px;gap:8px;border-radius:8px;}
+  .poster .irow .ic{font-size:24px;width:30px;} .poster .irow .it2{font-size:15px;} .poster .irow .sub{font-size:12.5px;}
+  .poster .filecards{gap:6px;} .poster .fcard{padding:8px 9px;border-radius:8px;} .poster .fcard .fhead{font-size:15px;margin-bottom:4px;} .poster .fcard .fdesc{font-size:13px;line-height:1.2;}
   /* hizli referans: dar kart icinde TEK kolon, sirali */
-  .poster .qref{min-width:0;grid-template-columns:1fr;gap:10px;}
-  .poster .qref .qbox{padding:13px 15px;gap:6px;}
-  .poster .qref .qhead{font-size:20px;} .poster .qref .qcode{font-size:16px;} .poster .qref .qdesc{font-size:17px;}
-  /* tablo (genis): tum sutunlari kaplar, normal boyut */
-  .poster .comptable{min-width:0;} .poster .comptable .ccell{font-size:20px;padding:12px 14px;}
+  .poster .qref{min-width:0;grid-template-columns:1fr;gap:6px;}
+  .poster .qref .qbox{padding:7px 8px;gap:4px;border-radius:7px;}
+  .poster .qref .qhead{font-size:14.5px;} .poster .qref .qcode{font-size:11.5px;padding:3px 6px;} .poster .qref .qdesc{font-size:12.5px;line-height:1.18;}
+  .poster .comptable{min-width:0;} .poster .comptable .ccell{font-size:11.5px;padding:6px 7px;}
 
   /* ===== CHEATSHEET STIL VARYANTLARI (template olarak secilebilir) ===== */
   /* (varsayilan) "paper": yukaridaki renkli serif referans stili */
@@ -433,8 +432,8 @@
     function sectionHTML(d,i){
       const acc=POSTER_ACCENTS[i%POSTER_ACCENTS.length];
       const blocks=(d.blocks||(d.points?[{type:'bullets',items:d.points}]:[])).map(blockHTML).join('');
-      // sadece genis karsilastirma tablosu tum sutunlari kaplasin; digerleri sutuna sigar
-      const wide=(d.blocks||[]).some(b=>b.type==='comptable');
+      // Referans sablonu tum bolumleri esit panel hucrelerinde tutar.
+      const wide=false;
       return `<div class="psec ${wide?'wide':''}" style="--acc:${acc}">
         <div class="psec-h">${d.bignum?`<span class="psec-num">${esc(d.bignum)}</span>`:''}<span class="psec-t">${fmtTitle(d.title||'')}</span></div>
         ${d.intro?`<div class="psec-i">${fmt(d.intro)}</div>`:''}
@@ -449,16 +448,26 @@
       const root=document.getElementById('root');
       const cover=(deck||[]).find(s=>s&&s.type==='cover')||{};
       const secs=(deck||[]).filter(s=>s&&s!==cover);
+      const few=secs.length<9?'few':'';
       const SP='<span class="poster-spark">✦</span>';
       // alt baslik: referans gibi bolum basliklarinin nokta ile ayrilmis listesi
       const topics=secs.map(s=>(s.title||'').replace(/[*_`]/g,'').trim()).filter(Boolean).join(' <span class="dot">·</span> ');
-      root.innerHTML=`<div class="poster ${orient} ${variant}"><div class="poster-inner">
+      const cols=orient==='land'?4:3;
+      const rows=Math.ceil(secs.length/cols);
+      const flow=[];
+      for(let c=0;c<cols;c++){
+        for(let r=0;r<rows;r++){
+          const item=secs[r*cols+c];
+          if(item)flow.push(item);
+        }
+      }
+      root.innerHTML=`<div class="poster ${orient} ${variant} ${few}"><div class="poster-inner">
         <div class="poster-head">
           <div class="poster-title">${SP}${fmtTitle(cover.title||'')}${SP}</div>
           <div class="poster-sub">${topics||esc(cover.subtitle||'')}</div>
           <div class="poster-rule"></div>
         </div>
-        <div class="poster-grid">${secs.map(sectionHTML).join('')}</div>
+        <div class="poster-grid">${flow.map(sectionHTML).join('')}</div>
         <div class="poster-foot">Bu rehberi faydali bulduysan <span class="acc">paylas</span> ✦ smart.slayt</div>
       </div></div>`;
       fitPoster();
@@ -470,10 +479,14 @@
       const PW=p.clientWidth, PH=p.clientHeight;
       const apply=(s)=>{ inner.style.width=(PW/s)+'px'; inner.style.transform='scale('+s+')'; };
       const fits=(s)=>{ apply(s); return (inner.scrollHeight*s)<=PH+1 && (inner.scrollWidth*s)<=PW+1; };
-      const CAND=[1.3,1.25,1.2,1.15,1.1,1.05,1.0,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5,0.45,0.4];
+      const CAND=p.classList.contains('few')
+        ? [1.0,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5,0.45,0.4]
+        : [1.3,1.25,1.2,1.15,1.1,1.05,1.0,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5,0.45,0.4];
       let chosen=0.4;
       for(const s of CAND){ if(fits(s)){ chosen=s; break; } }
       apply(chosen);
+      const usedH=Math.ceil(inner.scrollHeight*chosen);
+      p.style.height=(usedH<PH ? usedH : PH)+'px';
     }
     window.__renderPoster=renderPoster;
     window.__fitPoster=fitPoster;

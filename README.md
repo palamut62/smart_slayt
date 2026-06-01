@@ -48,7 +48,7 @@
 ## Features
 
 - 🧠 **LLM content generation** — describe a topic, get a structured multi-slide deck (cover, steps, callouts) via **OpenRouter** or the **Codex CLI** provider, with automatic fallback between them.
-- 📋 **Cheatsheet generator** — switch the **content type** from *Carousel* to *Cheatsheet* to produce a **single-page poster** (one tall `cheatsheet.png`) instead of multiple cards: a title header plus a packed grid of section panels, like a printable reference sheet. Covers 10 categories (usage guide, comparison, install guide, 101, commands, common mistakes, best practices, quick reference, tool summary, roadmap) and adds two dense block types: `comptable` (comparison table) and `qref` (quick-reference boxes).
+- 📋 **Cheatsheet generator** — switch the **content type** from *Carousel* to *Cheatsheet* to produce a **single-page 1080×1350 reference poster** (`cheatsheet.png`) instead of multiple cards: a large serif title, dotted section index, compact numbered panels, and a footer band. The web UI defaults cheatsheets to a 12-panel reference layout with a tight 3-column masonry flow, so panels pack without large blank gaps.
 - 🔎 **Multi-angle research** — before writing, the topic is researched in parallel across five intents — **YENI** (newest/changelog), **POPULER** (most-used), **IPUCU** (pro tips), **HATA** (common mistakes), **ILGINC** (surprising facts) — so cards stay concrete and well-rounded.
 - 🗓️ **Recency-aware** — today's date is injected into every prompt so the model prioritizes the *last 6–12 months* (latest version, release notes, new features) instead of stale training data.
 - ✅ **Fact-check pass** — a verification step cross-checks factual claims (versions, prices, commands, dates) against the research brief and corrects or softens unsupported ones, while preserving the JSON schema and copy.
@@ -206,18 +206,21 @@ node generate.js --json last-content.json
 Add `--mode cheatsheet` and pick a category with `--cheatsheet-type`:
 
 ```bash
-node generate.js "React Hooks" 8 --mode cheatsheet --cheatsheet-type 101
-node generate.js "Docker" 8 --mode cheatsheet --cheatsheet-type install-guide
-node generate.js "Docker" 8 --mode cheatsheet --cheatsheet-type install-guide --orientation landscape
+node generate.js "React Hooks" 12 --mode cheatsheet --cheatsheet-type 101
+node generate.js "Docker" 12 --mode cheatsheet --cheatsheet-type install-guide
+node generate.js "Docker" 12 --mode cheatsheet --cheatsheet-type install-guide --orientation landscape
 ```
 
-The cheatsheet renders to a **fixed A4 page** (`--orientation portrait` | `landscape`,
-default portrait); content is auto-scaled to fit the single page.
+The cheatsheet renders to a **single poster image** (`--orientation portrait` | `landscape`,
+default portrait). Portrait output uses a 1080×1350 social-poster frame and a compact
+3-column masonry layout; landscape uses 4 columns. Content is auto-scaled to fit the page
+and short decks are cropped to avoid empty bottom space.
 
 Valid `--cheatsheet-type` values: `usage-guide · comparison · install-guide · 101 ·
 commands · mistakes · best-practices · quick-reference · tool-summary · roadmap`
 (default `101`). In the **web UI**, choose **Content type → Cheatsheet**, then pick a
-**Cheatsheet type**; the `cheatsheet` template is auto-selected. Generated cheatsheet sets are
+**Cheatsheet type**; the `cheatsheet` template is auto-selected and the step count is set
+to 12 for the reference-poster layout. Generated cheatsheet sets are
 stored like any other set (with `type = 'cheatsheet'`) and flagged with a 📋 badge in the Library.
 
 Render a ready-made cheatsheet sample (no API credits):
@@ -236,6 +239,10 @@ node generate.js --json sample-cheatsheet.json
 ## Design & Templates
 
 - Colors, fonts, and layout live in `template.html` (`:root` variables + CSS).
+- Cheatsheet posters use a reference-sheet UI system: large serif title, dotted section index,
+  numbered colored panel badges, compact code/reference blocks, a tight 3-column masonry flow,
+  and a footer band. The generator prompt in `content.js` asks for balanced 12-panel sections
+  so the visual layout stays dense instead of leaving large blank areas.
 - Inline typography markers inside copy:
   - `*word*` → **bold**
   - `_word_` → rust italic emphasis

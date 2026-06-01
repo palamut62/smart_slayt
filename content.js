@@ -92,6 +92,13 @@ export const CHEATSHEET_SYSTEM = `Sen yazilim/teknik konularda YOGUN, REFERANS a
 Cikti carousel'den FARKLI: pazarlama dili YOK, girizgah YOK. Her kart TARAMA-DOSTU, dolu ve OGRETICI bir referans panosudur.
 Sana web arama araci verildi: komut/surum/parametre/link gibi her olguyu GERCEK kaynaktan dogrula; UYDURMA.
 
+# GORSEL SABLON (ZORUNLU)
+- Cikti tek sayfalik poster olarak render edilecek: ustte buyuk serif baslik, altinda nokta ile ayrilmis kategori satiri,
+  govdede 3 sutun x 4 satir numarali panel, en altta koyu paylasim bandi.
+- Ideal cheatsheet 12 bolumdur. Kullanici daha az/cok sayi vermediyse 12 bolum uret; bolumleri panel panel bagimsiz okunacak sekilde yaz.
+- Her panel referans gorselindeki gibi: renkli daire numara + kisa baslik + kompakt icerik bloklari. Uzun paragraflar yerine taranabilir maddeler/kodlar kullan.
+- Tek panelin diger panellerden asiri uzun olmasina izin verme; metni dengeli dagit. Tablolari kisa hucreli tut, genis/uzun tablo yapma.
+
 # Tipografi isaretleri (her metin alaninda)
 - *kelime* -> kalin · _kelime_ -> kirmizi vurgu · \`kod\` -> kod/komut rozeti (\`npm i\`, \`/komut\`, \`config.json\`)
 
@@ -120,7 +127,7 @@ Sana web arama araci verildi: komut/surum/parametre/link gibi her olguyu GERCEK 
 7) qref (HIZLI REFERANS/KOMUT icin ideal): {"type":"qref","items":[{"icon":"🔍","title":"ETIKET","code":"komut --flag","desc":"ne ise yarar"}, ...]}  (4-8 oge, kompakt kutucuklar)
 
 # YOGUNLUK (cheatsheet DOLU olmali)
-- Her kart ~80-120 kelime bilgi tasisin; bos alan birakma. Kisa ama BILGI YUKLU yaz.
+- Her panel ~45-85 kelime bilgi tasisin; bos alan birakma ama posterde tasacak kadar uzatma. Kisa ama BILGI YUKLU yaz.
 - Yazilim/CLI ise GERCEK komutlari kullan (code/qref blogunda). Uydurma komut/surum/parametre YASAK.
 - comptable hucrelerinde kisa, kiyaslanabilir deger yaz (sayfa basina 2-4 kelime).
 
@@ -190,6 +197,8 @@ ${brief || "(brief yok — yine de konuya OZGU, gercek ve dogru bilgi ver; uydur
 """
 
 CHEATSHEET KURALLARI:
+- Poster sablonu referans gorselindeki gibi 3 sutun x 4 satir numarali panel hedefler. Mumkunse 12 bolum kullan; verilen bolum sayisi "${steps}" ise tam olarak o kadar bolum uret.
+- Bolum basliklari ust kategori satirinda gorunecek; 2-4 kelime, birbirinden ayirt edilebilir ve sirali akisa uygun olsun.
 - Kapak: title = "${topic} · ${cat.label}", subtitle = kisa vaat + "${steps} BOLUM".
 - Her bolum NET bir alt baslik + kisa intro + 1-2 blok + pratik callout.
 - Blok tipini ICERIGE gore sec; KARSILASTIRMA turunde \`comptable\` kullan; HIZLI REFERANS/KOMUTLAR turunde \`qref\` veya \`code\` kullan.
