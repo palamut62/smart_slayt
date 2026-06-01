@@ -198,15 +198,27 @@ CHEATSHEET KURALLARI:
 - Link/site verirken brifteki RESMI_KAYNAK alan adini kullan; alakasiz site verme.`;
 }
 
-async function callOR({ apiKey, model, messages, web, json, max_results = 6 }) {
+async function callOR({ apiKey, model, messages, web, json, max_results = 6, timeoutMs = 120000 }) {
   const body = { model, messages, temperature: 0.6 };
   if (json) body.response_format = { type: "json_object" };
   if (web) body.plugins = [{ id: "web", max_results }];
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", "X-Title": "smart_slayt" },
-    body: JSON.stringify(body),
-  });
+  // Zaman asimi: yavas/takilan model cagrisi akisi sonsuza kadar bloklamasin.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  let res;
+  try {
+    res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", "X-Title": "smart_slayt" },
+      body: JSON.stringify(body),
+      signal: ctrl.signal,
+    });
+  } catch (e) {
+    if (e && e.name === "AbortError") throw new Error(`OpenRouter zaman asimi (${Math.round(timeoutMs / 1000)} sn) — model: ${model}`);
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
   if (!res.ok) throw new Error(`OpenRouter hata ${res.status}: ${await res.text()}`);
   const data = await res.json();
   return data.choices?.[0]?.message?.content || "";
@@ -274,14 +286,14 @@ Sadece gercekten hicbir kaynakta olmayan detay icin "bilinmiyor" yaz.`;
   const userQ = `Konu: "${topic}". Once dogru ureticiyi ve resmi kaynagi tespit et, sonra OZ ve net bir brif ver (kisa tut). ${RECENCY}`;
   try {
     const brief = await callOR({
-      apiKey, model: rModel, web: true, max_results: 10,
+      apiKey, model: rModel, web: true, max_results: 10, timeoutMs: 90000,
       messages: [{ role: "system", content: sysR }, { role: "user", content: userQ }],
     });
     if (brief && brief.trim().length > 40) return brief.trim();
   } catch { /* yedege gec */ }
   // Yedek: kullanicinin modeli + web plugin
   const brief2 = await callOR({
-    apiKey, model, web: true, max_results: 10,
+    apiKey, model, web: true, max_results: 10, timeoutMs: 90000,
     messages: [{ role: "system", content: sysR }, { role: "user", content: userQ }],
   });
   return (brief2 || "").trim();
@@ -303,7 +315,7 @@ async function deepDive({ topic, sections, apiKey, researchModel }) {
 (gercek komut/sayi/isim/dozaj/ornek). Kisa madde madde, Turkce. Uydurma; emin degilsen atla.`;
   const tasks = sections.map((sec) =>
     callOR({
-      apiKey, model: rModel, web: true, max_results: 3,
+      apiKey, model: rModel, web: true, max_results: 3, timeoutMs: 75000,
       messages: [{ role: "system", content: sys }, { role: "user", content: `KONU: ${topic}\nALT-BASLIK: ${sec}` }],
     }).then((r) => `### ${sec}\n${(r || "").trim()}`).catch(() => "")
   );
@@ -361,7 +373,7 @@ async function researchAngles({ topic, apiKey, researchModel }) {
     `Resmi kaynagi esas al. Uydurma; emin degilsen atla. Kisa, madde madde, Turkce.`;
   const tasks = ANGLES.map((a) =>
     callOR({
-      apiKey, model: rModel, web: true, max_results: 5,
+      apiKey, model: rModel, web: true, max_results: 5, timeoutMs: 75000,
       messages: [{ role: "system", content: sys }, { role: "user", content: a.q }],
     }).then((r) => (r && r.trim() ? `### ${a.key}\n${r.trim()}` : "")).catch(() => "")
   );
@@ -380,7 +392,7 @@ GOREV: Sadece OLGUSAL iddialari denetle — surum numaralari, tarihler, fiyat/pl
 Cikti SADECE gecerli JSON: { "slides": [...] } (ayni sema).`;
   const user = `KONU: ${topic}\n\nARASTIRMA BRIFI:\n"""\n${(brief || "").slice(0, 8000)}\n"""\n\nDENETLENECEK SLAYTLAR:\n${JSON.stringify({ slides }).slice(0, 12000)}`;
   const raw = await callOR({
-    apiKey, model, json: true,
+    apiKey, model, json: true, timeoutMs: 90000,
     messages: [{ role: "system", content: sys }, { role: "user", content: user }],
   });
   const parsed = extractJson(raw);
@@ -429,7 +441,7 @@ export async function generateSlides({ topic, steps = 8, apiKey, model, research
     : buildUserMsg({ topic, steps, total, langName, brief });
   const baseMessages = [{ role: "system", content: sysPrompt }, { role: "user", content: userMsg }];
 
-  const raw = await callOR({ apiKey, model: MODEL, json: true, messages: baseMessages });
+  const raw = await callOR({ apiKey, model: MODEL, json: true, timeoutMs: 150000, messages: baseMessages });
   let parsed = extractJson(raw);
   let slides = parsed && parsed.slides;
   let check = validateSlides(slides);
@@ -441,7 +453,7 @@ export async function generateSlides({ topic, steps = 8, apiKey, model, research
       `AYNI semaya birebir uyan, GECERLI JSON'u bastan ver (sadece JSON, aciklama yok). ` +
       `slides dizisi olmali; her slide.title string; blok tipleri yalniz: bullets/code/grid/iconrows/filecards/comptable/qref.`;
     const raw2 = await callOR({
-      apiKey, model: MODEL, json: true,
+      apiKey, model: MODEL, json: true, timeoutMs: 120000,
       messages: [...baseMessages, { role: "assistant", content: (raw || "").slice(0, 4000) }, { role: "user", content: repairMsg }],
     });
     const parsed2 = extractJson(raw2);
