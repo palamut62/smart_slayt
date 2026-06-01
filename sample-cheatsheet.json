@@ -1,0 +1,53 @@
+[
+  { "type": "cover", "title": "Docker · _Nasıl Kurulur_", "subtitle": "SIFIRDAN ÇALIŞAN KONTEYNER · 4 BÖLÜM" },
+  {
+    "type": "step", "step": "BÖLÜM 01", "bignum": "01", "page": "2/5",
+    "title": "Kurulum & İlk Çalıştırma",
+    "intro": "Resmi kaynaktan kur, sürümü doğrula, ilk konteyneri çalıştır.",
+    "blocks": [
+      { "type": "code", "text": "curl -fsSL https://get.docker.com | sh  ->  docker --version  ->  docker run hello-world" }
+    ],
+    "callout": "Linux'ta `sudo` gerekebilir; `usermod -aG docker $USER` ile gruba ekleyip oturumu yenile."
+  },
+  {
+    "type": "step", "step": "BÖLÜM 02", "bignum": "02", "page": "3/5",
+    "title": "Temel Komutlar",
+    "blocks": [
+      { "type": "qref", "items": [
+        { "icon": "📦", "title": "İmaj çek", "code": "docker pull nginx", "desc": "Registry'den imaj indirir." },
+        { "icon": "🚀", "title": "Çalıştır", "code": "docker run -d -p 80:80 nginx", "desc": "Arka planda port eşleyerek başlatır." },
+        { "icon": "📋", "title": "Listele", "code": "docker ps -a", "desc": "Tüm konteynerleri gösterir." },
+        { "icon": "🧹", "title": "Temizle", "code": "docker system prune", "desc": "Kullanılmayan kaynakları siler." }
+      ]}
+    ],
+    "callout": "`docker logs -f <id>` ile canlı log akışını izleyebilirsin."
+  },
+  {
+    "type": "step", "step": "BÖLÜM 03", "bignum": "03", "page": "4/5",
+    "title": "Docker vs Alternatifler",
+    "blocks": [
+      { "type": "comptable",
+        "columns": ["Docker", "Podman", "containerd"],
+        "rows": [
+          { "label": "Daemon", "cells": ["Var", "Yok (rootless)", "Var"] },
+          { "label": "Kök yetki", "cells": ["Genelde", "Gerekmez", "Gerekir"] },
+          { "label": "Compose", "cells": ["Yerleşik", "podman-compose", "Harici"] },
+          { "label": "Kullanım", "cells": ["En yaygın", "Güvenlik", "Altyapı"] }
+        ]
+      }
+    ],
+    "callout": "Geliştirme için Docker, rootless güvenlik için Podman pratik bir seçimdir."
+  },
+  {
+    "type": "step", "step": "BÖLÜM 04", "bignum": "04", "page": "5/5",
+    "title": "Sık Hatalar",
+    "blocks": [
+      { "type": "bullets", "items": [
+        "*Cannot connect to the Docker daemon*: servis kapalı → `sudo systemctl start docker` ile başlat.",
+        "*port is already allocated*: port dolu → `-p 8080:80` ile farklı host portu kullan.",
+        "*no space left on device*: imaj birikti → `docker system prune -a` ile temizle."
+      ]}
+    ],
+    "callout": "Hata mesajını birebir oku; çoğu çözüm `docker logs` ve `docker inspect` çıktısında saklıdır."
+  }
+]

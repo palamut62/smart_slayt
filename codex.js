@@ -6,7 +6,7 @@ import { promisify } from "util";
 import fs from "fs";
 import os from "os";
 import { resolve, join } from "path";
-import { SYSTEM, LANGS, buildUserMsg } from "./content.js";
+import { SYSTEM, LANGS, buildUserMsg, CHEATSHEET_SYSTEM, buildCheatsheetUserMsg } from "./content.js";
 
 const execFileP = promisify(execFile);
 const CODEX_BIN = process.env.CODEX_BIN || "codex";
@@ -45,7 +45,7 @@ function extractJSON(text) {
   return JSON.parse(s.slice(start, end + 1));
 }
 
-export async function generateSlidesViaCodex({ topic, steps = 8, lang = "tr", deep = false, model }) {
+export async function generateSlidesViaCodex({ topic, steps = 8, lang = "tr", deep = false, model, mode = "carousel", cheatsheetType = "101" }) {
   const langName = LANGS[lang] || lang;
   const total = steps + 1;
 
@@ -63,9 +63,12 @@ Su ACILARIN HEPSINI ayri ayri arastir ve kartlara yedir:
 Resmi kaynaklari esas al (ureticinin sitesi, resmi docs, GitHub deposu, npm/pypi). Blog/SEO/aggregator'a guvenme.
 Kurulum komutunu ve gercek komutlari resmi dokumandan dogrula. Uydurma; emin olmadigin detayi atla.${deep ? "\nHER ana basligi ayri ayri, derinlemesine arastir (cok sayida arama yap)." : ""}`;
 
-  const userMsg = buildUserMsg({ topic, steps, total, langName, brief: researchDirective });
+  const isCheat = mode === "cheatsheet";
+  const userMsg = isCheat
+    ? buildCheatsheetUserMsg({ topic, steps, total, langName, brief: researchDirective, cheatsheetType })
+    : buildUserMsg({ topic, steps, total, langName, brief: researchDirective });
   const prompt =
-`${SYSTEM}
+`${isCheat ? CHEATSHEET_SYSTEM : SYSTEM}
 
 ${userMsg}
 

@@ -235,6 +235,26 @@
       <div class="field"><label data-i18n="f_topic">Konu</label>
         <input id="topic" data-i18n-ph="ph_topic" placeholder="Ör: 2025'te yapay zeka ile pasif gelir" /></div>
       <div class="grid2" style="grid-template-columns:1fr 1fr;margin-top:20px">
+        <div class="field" style="margin:0"><label data-i18n="f_ctype">İçerik türü</label>
+          <select id="contentType" onchange="onContentType()">
+            <option value="carousel" data-i18n="ct_carousel">🎠 Carousel / Bilgi Kartı</option>
+            <option value="cheatsheet" data-i18n="ct_cheatsheet">📋 Cheatsheet</option>
+          </select></div>
+        <div class="field" id="cheatTypeField" style="margin:0;display:none"><label data-i18n="f_cheattype">Cheatsheet türü</label>
+          <select id="cheatType">
+            <option value="usage-guide" data-i18n="cs_usage">📖 Kullanım Kılavuzu</option>
+            <option value="comparison" data-i18n="cs_comparison">⚖️ Karşılaştırma</option>
+            <option value="install-guide" data-i18n="cs_install">⚙️ Nasıl Kurulur</option>
+            <option value="101" selected data-i18n="cs_101">🎓 101 / Başlangıç Rehberi</option>
+            <option value="commands" data-i18n="cs_commands">⌨️ Komutlar</option>
+            <option value="mistakes" data-i18n="cs_mistakes">⚠️ Sık Hatalar</option>
+            <option value="best-practices" data-i18n="cs_best">✅ Best Practices</option>
+            <option value="quick-reference" data-i18n="cs_quick">⚡ Hızlı Referans</option>
+            <option value="tool-summary" data-i18n="cs_tool">🧰 Araç / Kütüphane Özeti</option>
+            <option value="roadmap" data-i18n="cs_roadmap">🗺️ Yol Haritası</option>
+          </select></div>
+      </div>
+      <div class="grid2" style="grid-template-columns:1fr 1fr;margin-top:20px">
         <div class="field" style="margin:0"><label data-i18n="f_lang">Dil</label>
           <select id="lang">
             <option value="tr">🇹🇷 Türkçe</option>
@@ -461,6 +481,11 @@ const I18N={
   studio_lead:`Konunu yaz; uygulama webden güncel verileri araştırıp ikonlu, kod bloklu ve karşılaştırmalı bilgi kartları olarak tasarlar. Şablon ve renk paletini seç, her seri otomatik kütüphanene kaydedilsin.`,
   f_topic:`Konu`, ph_topic:`Ör: 2025'te yapay zeka ile pasif gelir`,
   f_lang:`Dil`, f_steps:`Adim sayisi`, f_template:`Sablon (template)`, f_palette:`Renk paleti`,
+  f_ctype:`İçerik türü`, f_cheattype:`Cheatsheet türü`,
+  ct_carousel:`🎠 Carousel / Bilgi Kartı`, ct_cheatsheet:`📋 Cheatsheet`,
+  cs_usage:`📖 Kullanım Kılavuzu`, cs_comparison:`⚖️ Karşılaştırma`, cs_install:`⚙️ Nasıl Kurulur`,
+  cs_101:`🎓 101 / Başlangıç Rehberi`, cs_commands:`⌨️ Komutlar`, cs_mistakes:`⚠️ Sık Hatalar`,
+  cs_best:`✅ Best Practices`, cs_quick:`⚡ Hızlı Referans`, cs_tool:`🧰 Araç / Kütüphane Özeti`, cs_roadmap:`🗺️ Yol Haritası`,
   deep_label:`🔬 Derin araştırma <span style="color:var(--ink-soft);font-weight:400">— her başlık için ayrı web araştırması (daha kapsamlı, biraz yavaş)</span>`,
   btn_generate:`Kartlari Üret`, gen_hint:`web arastirmali · derin modda ~1-2 dk`,
   working_title:`Kartlar tasarlaniyor…`, working_sub:`Web arastiriliyor ve metinler yaziliyor`,
@@ -542,6 +567,11 @@ const I18N={
   studio_lead:`Type your topic; the app researches up-to-date data from the web and designs it into knowledge cards with icons, code blocks and comparisons. Pick a template and palette — every series is saved to your library automatically.`,
   f_topic:`Topic`, ph_topic:`e.g. Passive income with AI in 2025`,
   f_lang:`Language`, f_steps:`Step count`, f_template:`Template`, f_palette:`Color palette`,
+  f_ctype:`Content type`, f_cheattype:`Cheatsheet type`,
+  ct_carousel:`🎠 Carousel / Info Cards`, ct_cheatsheet:`📋 Cheatsheet`,
+  cs_usage:`📖 Usage Guide`, cs_comparison:`⚖️ Comparison`, cs_install:`⚙️ How to Install`,
+  cs_101:`🎓 101 / Getting Started`, cs_commands:`⌨️ Commands`, cs_mistakes:`⚠️ Common Mistakes`,
+  cs_best:`✅ Best Practices`, cs_quick:`⚡ Quick Reference`, cs_tool:`🧰 Tool / Library Summary`, cs_roadmap:`🗺️ Roadmap`,
   deep_label:`🔬 Deep research <span style="color:var(--ink-soft);font-weight:400">— a separate web search per heading (more thorough, a bit slower)</span>`,
   btn_generate:`Generate Cards`, gen_hint:`web-researched · ~1-2 min in deep mode`,
   working_title:`Designing cards…`, working_sub:`Researching the web and writing copy`,
@@ -851,7 +881,9 @@ async function generate(){
   };
   try{
     const deep=document.getElementById('deep').checked;
-    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,steps,lang,palette:_palette,template:_template,deep})});
+    const mode=document.getElementById('contentType').value==='cheatsheet'?'cheatsheet':'carousel';
+    const cheatsheetType=document.getElementById('cheatType').value;
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,steps,lang,palette:_palette,template:_template,deep,mode,cheatsheetType})});
     if(!r.ok && !r.body){const d=await r.json().catch(()=>({}));throw new Error(d.error||'Hata');}
     // NDJSON akisi: satir satir ilerleme olaylari, son satir done/error
     const reader=r.body.getReader(); const dec=new TextDecoder(); let buf='', d=null, errMsg=null;
@@ -889,8 +921,8 @@ async function loadLibrary(){
     const strip=s.cards.slice(0,4).map(c=>`<img src="${c.url}"/>`).join('');
     return `<div class="setcard" onclick="openSet(${s.id})" style="cursor:pointer">
       <div class="strip">${strip}</div>
-      <div class="meta"><h3>${s.topic}</h3>
-        <div class="sub"><b>${s.count} ${t('cards_word')}</b> · ${s.model||'—'} · ${fmtDate(s.createdAt)}</div></div>
+      <div class="meta"><h3>${s.type==='cheatsheet'?'📋 ':''}${s.topic}</h3>
+        <div class="sub"><b>${s.count} ${t('cards_word')}</b>${s.type==='cheatsheet'?` · <b style="color:var(--rust)">cheatsheet${s.cheatsheetType?' · '+s.cheatsheetType:''}</b>`:''} · ${s.model||'—'} · ${fmtDate(s.createdAt)}</div></div>
       <div class="acts" onclick="event.stopPropagation()">
         <button class="abtn open" title="${t('lib_open')}" onclick="openSet(${s.id})"><span class="i">▦</span><span class="t">${t('lib_open')}</span></button>
         <button class="abtn zip" title="${t('dl_zip')}" onclick="download('/api/sets/${s.id}/zip','seri-${s.id}.zip')"><span class="i">⬇</span><span class="t">${t('lib_zip')}</span></button>
@@ -935,7 +967,7 @@ function pickPal(k){_palette=k;renderPals();}
 renderPals();
 
 // --- Template secici ---
-const TPL_INFO={editorial:['📰','Editorial'],bold:['🅱️','Bold'],minimal:['◻️','Minimal'],scrapbook:['✂️','Scrapbook'],terminal:['⌨️','Terminal'],infocard:['🪪','Bilgi Kartı']};
+const TPL_INFO={editorial:['📰','Editorial'],bold:['🅱️','Bold'],minimal:['◻️','Minimal'],scrapbook:['✂️','Scrapbook'],terminal:['⌨️','Terminal'],infocard:['🪪','Bilgi Kartı'],cheatsheet:['📋','Cheatsheet']};
 let _template='editorial';
 function renderTpls(){
   document.getElementById('tpls').innerHTML=Object.entries(TPL_INFO).map(([k,[ic,nm]])=>
@@ -945,6 +977,19 @@ function renderTpls(){
 }
 function pickTpl(k){_template=k;renderTpls();}
 renderTpls();
+
+// İçerik türü degisince: cheatsheet tur secimini goster/gizle, sablonu otomatik onerile uyarla.
+let _tplBeforeCheat=null;
+function onContentType(){
+  const ct=document.getElementById('contentType').value;
+  const isCheat=ct==='cheatsheet';
+  document.getElementById('cheatTypeField').style.display=isCheat?'block':'none';
+  if(isCheat){
+    if(_template!=='cheatsheet'){_tplBeforeCheat=_template;_template='cheatsheet';renderTpls();}
+  }else if(_template==='cheatsheet'){
+    _template=_tplBeforeCheat||'editorial';renderTpls();
+  }
+}
 
 // --- Tema (acik/koyu) ---
 function applyThemeBtn(){

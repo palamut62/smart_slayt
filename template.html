@@ -79,7 +79,42 @@
   .chips .clab{font-size:24px;font-weight:600;}
   .chip{font-family:'Roboto Mono',monospace;font-size:22px;color:var(--rust);background:color-mix(in srgb, var(--rust) 14%, var(--card));border:1px solid color-mix(in srgb, var(--rust) 30%, var(--card));border-radius:8px;padding:4px 12px;}
 
+  /* karsilastirma tablosu (cheatsheet) */
+  .comptable{position:relative;z-index:1;border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:820px;}
+  .comptable .crow{display:grid;border-bottom:1px solid var(--line);}
+  .comptable .crow:last-child{border-bottom:none;}
+  .comptable .chead{background:var(--rust);color:var(--card);font-weight:800;}
+  .comptable .ccell{padding:13px 15px;font-size:21px;line-height:1.22;border-right:1px solid color-mix(in srgb,var(--line) 70%,transparent);overflow-wrap:break-word;word-break:normal;hyphens:auto;}
+  .comptable .ccell:last-child{border-right:none;}
+  .comptable .chead .ccell{border-right-color:color-mix(in srgb,var(--card) 30%,transparent);}
+  .comptable .crow:nth-child(even):not(.chead){background:var(--inner);}
+  .comptable .clabel{font-weight:800;color:var(--rust);background:var(--inner);}
+  .comptable .crow:nth-child(even):not(.chead) .clabel{background:var(--tan);}
+
+  /* hizli referans kutucuklari (cheatsheet) */
+  .qref{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:16px;min-width:820px;}
+  .qref .qbox{background:var(--inner);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;}
+  .qref .qhead{display:flex;align-items:center;gap:10px;font-size:25px;font-weight:800;}
+  .qref .qhead .ic{font-size:28px;}
+  .qref .qcode{font-family:'Roboto Mono',monospace;font-size:21px;font-weight:600;color:var(--rust);background:color-mix(in srgb,var(--rust) 12%,var(--card));border:1px solid color-mix(in srgb,var(--rust) 28%,var(--card));border-radius:7px;padding:5px 10px;overflow-wrap:anywhere;}
+  .qref .qdesc{font-size:21px;line-height:1.25;color:var(--ink);opacity:.85;}
+
   .callout{flex:none;margin-top:26px;background:var(--tan);border-left:7px solid var(--rust);border-radius:12px;padding:26px 30px;font-size:28px;line-height:1.32;z-index:1;}
+
+  /* ============ TEMPLATE: CHEATSHEET (yogun referans) ============ */
+  /* Daha kucuk tipografi + daha az dolgu: tek kartta daha cok bilgi sigar. */
+  .tpl-cheat .corner{display:none;}
+  .tpl-cheat .bignum{font-size:180px;opacity:.05;font-style:normal;}
+  .tpl-cheat .card{border:2px solid var(--rust);border-radius:18px;padding:48px 48px;}
+  .tpl-cheat .step-label{font-family:'Roboto Mono',monospace;letter-spacing:3px;background:var(--rust);color:var(--card);padding:5px 14px;border-radius:7px;display:inline-block;font-size:19px;}
+  .tpl-cheat .title{font-size:60px;line-height:1.02;}
+  .tpl-cheat .card:not(.cover) .title{max-width:none;}
+  .tpl-cheat .rule{height:5px;width:70px;margin:18px 0 22px;}
+  .tpl-cheat .intro{font-size:26px;margin-bottom:20px;}
+  .tpl-cheat .bodyinner{gap:18px;}
+  .tpl-cheat ul.points{gap:16px;} .tpl-cheat ul.points li{font-size:26px;}
+  .tpl-cheat .callout{margin-top:18px;padding:20px 24px;font-size:24px;}
+  .tpl-cheat .card.cover .title{font-size:96px;}
 
   /* KAPAK */
   .card.cover{display:flex;flex-direction:column;justify-content:center;padding:80px 64px;}
@@ -266,6 +301,21 @@
             ${(c.tags&&c.tags.length)?`<div class="chips">${c.tagsLabel?`<span class="clab">${esc(c.tagsLabel)}</span>`:''}${c.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}
           </div>`).join('')}</div>`;
       }
+      if(b.type==='comptable'){
+        const cols=b.columns||[]; const n=cols.length+1; // ilk kolon satir etiketi
+        const tmpl=`grid-template-columns:minmax(0,0.8fr) repeat(${cols.length},minmax(0,1fr));`;
+        const head=`<div class="crow chead" style="${tmpl}"><div class="ccell"></div>${cols.map(c=>`<div class="ccell">${esc(c)}</div>`).join('')}</div>`;
+        const rows=(b.rows||[]).map(r=>`<div class="crow" style="${tmpl}"><div class="ccell clabel">${fmt(r.label||'')}</div>${(r.cells||[]).map(cell=>`<div class="ccell">${fmt(cell)}</div>`).join('')}</div>`).join('');
+        return `<div class="comptable">${head}${rows}</div>`;
+      }
+      if(b.type==='qref'){
+        return `<div class="qref">${(b.items||[]).map(it=>`
+          <div class="qbox">
+            <div class="qhead"><span class="ic">${ico(it)}</span>${esc(it.title||'')}</div>
+            ${it.code?`<div class="qcode">${esc(it.code)}</div>`:''}
+            ${it.desc?`<div class="qdesc">${fmt(it.desc)}</div>`:''}
+          </div>`).join('')}</div>`;
+      }
       return '';
     }
 
@@ -358,7 +408,7 @@
     window.__palettes=Object.keys(PALETTES);
 
     // --- Template (yerlesim derisi) ---
-    const TPLS={editorial:'',bold:'tpl-bold',minimal:'tpl-minimal',scrapbook:'tpl-scrap',terminal:'tpl-term',infocard:'tpl-info'};
+    const TPLS={editorial:'',bold:'tpl-bold',minimal:'tpl-minimal',scrapbook:'tpl-scrap',terminal:'tpl-term',infocard:'tpl-info',cheatsheet:'tpl-cheat'};
     function setTemplate(name){document.body.className=TPLS[name]||'';}
     window.__setTemplate=setTemplate;
 

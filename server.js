@@ -4,7 +4,7 @@ import { ZipArchive } from "archiver"; // archiver v8: named export, eski archiv
 import { dirname, resolve } from "path";
 import fs from "fs";
 import { loadConfig, saveConfig, maskKey, PALETTES, TEMPLATES, LANG_CODES } from "./config.js";
-import { generateSlides } from "./content.js";
+import { generateSlides, CHEATSHEET_TYPES } from "./content.js";
 import { generateSlidesViaCodex, codexStatus } from "./codex.js";
 import { renderSlides, closeBrowser } from "./render.js";
 import { createSet, listSets, getSet, deleteSet } from "./db.js";
@@ -119,10 +119,12 @@ app.post("/api/codex/test", async (req, res) => {
 
 // --- Uretim (NDJSON akisi: ilerleme satirlari + son 'done'/'error' satiri) ---
 app.post("/api/generate", async (req, res) => {
-  const { topic, steps, lang, palette, template, deep } = req.body || {};
+  const { topic, steps, lang, palette, template, deep, mode, cheatsheetType } = req.body || {};
   const pal = PALETTES.includes(palette) ? palette : "kraft";
   const tpl = TEMPLATES.includes(template) ? template : "editorial";
   const lng = LANG_CODES.includes(lang) ? lang : "tr";
+  const md = mode === "cheatsheet" ? "cheatsheet" : "carousel";
+  const cst = (md === "cheatsheet" && CHEATSHEET_TYPES[cheatsheetType]) ? cheatsheetType : (md === "cheatsheet" ? "101" : null);
 
   // Akis basligi: her satir tek bir JSON olay. Hata bile olsa 200 ile akar.
   res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
@@ -138,7 +140,7 @@ app.post("/api/generate", async (req, res) => {
 
     // content.js fazlarini istemciye ilet
     const onPhase = (phase, info) => send({ type: "progress", stage: phase, ...(info || {}) });
-    const viaOpenRouter = () => generateSlides({ topic: t, steps: n, apiKey: cfg.apiKey, model: cfg.model, researchModel: cfg.researchModel, lang: lng, deep: !!deep, onProgress: onPhase });
+    const viaOpenRouter = () => generateSlides({ topic: t, steps: n, apiKey: cfg.apiKey, model: cfg.model, researchModel: cfg.researchModel, lang: lng, deep: !!deep, mode: md, cheatsheetType: cst, onProgress: onPhase });
 
     send({ type: "progress", stage: "start" });
     let slides, usedProvider = provider, warning = "";
@@ -147,7 +149,7 @@ app.post("/api/generate", async (req, res) => {
       if (st.ok) {
         try {
           send({ type: "progress", stage: "writing" });
-          slides = await generateSlidesViaCodex({ topic: t, steps: n, lang: lng, deep: !!deep, model: cfg.codexModel });
+          slides = await generateSlidesViaCodex({ topic: t, steps: n, lang: lng, deep: !!deep, model: cfg.codexModel, mode: md, cheatsheetType: cst });
         } catch (e) {
           if (cfg.apiKey) { slides = await viaOpenRouter(); usedProvider = "openrouter"; warning = `Codex hatasi: ${e.message} — OpenRouter ile uretildi.`; }
           else throw new Error(`Codex hatasi: ${e.message} (OpenRouter anahtari da yok).`);
@@ -171,7 +173,7 @@ app.post("/api/generate", async (req, res) => {
       (done, tot) => send({ type: "progress", stage: "render", done, total: tot }));
     const cards = files.map((f) => ({ name: f.name, url: `/out/${stamp}/${f.name}` }));
     const modelLabel = usedProvider === "codex" ? `codex${cfg.codexModel ? " · " + cfg.codexModel : ""}` : cfg.model;
-    const set = createSet({ topic: t, model: modelLabel, steps: n, slides, cards });
+    const set = createSet({ topic: t, model: modelLabel, steps: n, slides, cards, type: md, cheatsheetType: cst });
     send({ type: "done", ...set, provider: usedProvider, warning });
     res.end();
   } catch (e) {

@@ -26,11 +26,20 @@ CREATE TABLE IF NOT EXISTS cards (
 );
 `);
 
-export function createSet({ topic, model, steps, slides, cards }) {
+// Geriye donuk uyumlu migration: var olan kolonu tekrar EKLEME (hata vermesin).
+// Eski kayitlar bozulmaz; yeni kolonlar varsayilanla doldurulur.
+function ensureColumn(table, column, ddl) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+  if (!cols.some((c) => c.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+}
+ensureColumn("sets", "type", "type TEXT DEFAULT 'carousel'");
+ensureColumn("sets", "cheatsheet_type", "cheatsheet_type TEXT");
+
+export function createSet({ topic, model, steps, slides, cards, type, cheatsheetType }) {
   const now = Date.now();
   const info = db
-    .prepare("INSERT INTO sets (topic, model, steps, slides_json, created_at) VALUES (?,?,?,?,?)")
-    .run(topic, model || "", steps || 0, JSON.stringify(slides), now);
+    .prepare("INSERT INTO sets (topic, model, steps, slides_json, created_at, type, cheatsheet_type) VALUES (?,?,?,?,?,?,?)")
+    .run(topic, model || "", steps || 0, JSON.stringify(slides), now, type || "carousel", cheatsheetType || null);
   const setId = info.lastInsertRowid;
   const ins = db.prepare("INSERT INTO cards (set_id, idx, filename, url) VALUES (?,?,?,?)");
   cards.forEach((c, i) => ins.run(setId, i, c.name, c.url));
@@ -42,6 +51,7 @@ export function listSets() {
   const cardsStmt = db.prepare("SELECT * FROM cards WHERE set_id=? ORDER BY idx");
   return sets.map((s) => ({
     id: s.id, topic: s.topic, model: s.model, steps: s.steps,
+    type: s.type || "carousel", cheatsheetType: s.cheatsheet_type || null,
     createdAt: s.created_at, count: cardsStmt.all(s.id).length,
     cards: cardsStmt.all(s.id),
   }));
@@ -53,6 +63,7 @@ export function getSet(id) {
   const cards = db.prepare("SELECT * FROM cards WHERE set_id=? ORDER BY idx").all(id);
   return {
     id: s.id, topic: s.topic, model: s.model, steps: s.steps,
+    type: s.type || "carousel", cheatsheetType: s.cheatsheet_type || null,
     createdAt: s.created_at, slides: JSON.parse(s.slides_json || "[]"),
     count: cards.length, cards,
   };

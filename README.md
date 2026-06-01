@@ -48,11 +48,12 @@
 ## Features
 
 - 🧠 **LLM content generation** — describe a topic, get a structured multi-slide deck (cover, steps, callouts) via **OpenRouter** or the **Codex CLI** provider, with automatic fallback between them.
+- 📋 **Cheatsheet generator** — switch the **content type** from *Carousel* to *Cheatsheet* for dense, reference-style decks across 10 categories (usage guide, comparison, install guide, 101, commands, common mistakes, best practices, quick reference, tool summary, roadmap). Adds a dedicated `cheatsheet` template plus two dense block types: `comptable` (comparison table) and `qref` (quick-reference boxes).
 - 🔎 **Multi-angle research** — before writing, the topic is researched in parallel across five intents — **YENI** (newest/changelog), **POPULER** (most-used), **IPUCU** (pro tips), **HATA** (common mistakes), **ILGINC** (surprising facts) — so cards stay concrete and well-rounded.
 - 🗓️ **Recency-aware** — today's date is injected into every prompt so the model prioritizes the *last 6–12 months* (latest version, release notes, new features) instead of stale training data.
 - ✅ **Fact-check pass** — a verification step cross-checks factual claims (versions, prices, commands, dates) against the research brief and corrects or softens unsupported ones, while preserving the JSON schema and copy.
 - 🖼️ **Pixel-perfect rendering** — fixed HTML/CSS template rendered to **1080×1350 PNG** at 2× device scale via Playwright/Chromium. Text never blurs or misspells.
-- 🎨 **5 templates × 7 palettes** — `editorial · bold · minimal · scrapbook · terminal` themes; `kraft · forest · midnight · blush · ocean · sunset · noir` color palettes.
+- 🎨 **7 templates × 7 palettes** — `editorial · bold · minimal · scrapbook · terminal · infocard · cheatsheet` themes; `kraft · forest · midnight · blush · ocean · sunset · noir` color palettes.
 - 🌍 **Multi-language** — `tr · en · de · fr · es · it · ru · ar`, with locale-aware uppercase handling.
 - 🪄 **Auto-fit layout** — content that would overflow a card is measured (after web fonts load) and scaled to fit, preventing text overlap.
 - 🔖 **Logo enrichment** — relevant brand logos are fetched from the web and attached to cards automatically.
@@ -166,7 +167,7 @@ Settings UI rather than by hand.
 | `x.appKey` …        | X/Twitter API credentials (4 fields)                 | —                            |
 | `defaults.lang`     | `tr · en · de · fr · es · it · ru · ar`              | `tr`                         |
 | `defaults.steps`    | Slides per deck (1–15)                               | `8`                          |
-| `defaults.template` | `editorial · bold · minimal · scrapbook · terminal`  | `editorial`                  |
+| `defaults.template` | `editorial · bold · minimal · scrapbook · terminal · infocard · cheatsheet` | `editorial`     |
 | `defaults.palette`  | `kraft · forest · midnight · blush · ocean · sunset · noir` | `kraft`                |
 
 ### CLI environment variables
@@ -200,6 +201,27 @@ node generate.js --json sample.json
 node generate.js --json last-content.json
 ```
 
+#### Cheatsheet mode (CLI)
+
+Add `--mode cheatsheet` and pick a category with `--cheatsheet-type`:
+
+```bash
+node generate.js "React Hooks" 8 --mode cheatsheet --cheatsheet-type 101
+node generate.js "Docker" 8 --mode cheatsheet --cheatsheet-type install-guide
+```
+
+Valid `--cheatsheet-type` values: `usage-guide · comparison · install-guide · 101 ·
+commands · mistakes · best-practices · quick-reference · tool-summary · roadmap`
+(default `101`). In the **web UI**, choose **Content type → Cheatsheet**, then pick a
+**Cheatsheet type**; the `cheatsheet` template is auto-selected. Generated cheatsheet sets are
+stored like any other set (with `type = 'cheatsheet'`) and flagged with a 📋 badge in the Library.
+
+Render a ready-made cheatsheet sample (no API credits):
+
+```bash
+node generate.js --json sample-cheatsheet.json
+```
+
 **Recommended workflow**
 
 1. `node generate.js "topic" 8` to draft.
@@ -223,7 +245,8 @@ node generate.js --json last-content.json
 > `TODO:` No automated test suite yet. Manual verification:
 
 ```bash
-node generate.js --json sample.json   # render a known deck and eyeball out/*.png
+node generate.js --json sample.json             # render a known carousel deck
+node generate.js --json sample-cheatsheet.json  # render a cheatsheet deck (comptable + qref)
 ```
 
 ## Deployment

@@ -73,6 +73,62 @@ export const LANGS = {
   es: "Español", ar: "العربية", ru: "Русский", it: "Italiano",
 };
 
+// ============ CHEATSHEET (referans dokuman) ============
+// Kategori slug -> {label, focus}. focus, o kategorinin kart akisini yonlendirir.
+export const CHEATSHEET_TYPES = {
+  "usage-guide":   { label: "Kullanim Kilavuzu", focus: "Nedir? · Ne zaman kullanilir? · Temel arayuz/kavramlar · Ilk kullanim akisi · Ayarlar · Ipuclari · Sik hata · Mini ornek" },
+  "comparison":    { label: "Karsilastirma", focus: "Secenekler · Artilar/eksiler · Kim hangisini secmeli? · Performans/maliyet/ogrenme egrisi · Ornek senaryo · Son karar matrisi" },
+  "install-guide": { label: "Nasil Kurulur", focus: "Gereksinimler · Indirme/kurulum komutu · Ilk calistirma · Konfigurasyon · Dogrulama testi · Sik kurulum hatalari · Kaldirma/guncelleme" },
+  "101":           { label: "101 / Baslangic Rehberi", focus: "Basit tanim · Temel kavramlar · Nerede kullanilir? · Ilk ornek · Ogrenme sirasi · Mini pratik · Sik hata · Sonraki adimlar" },
+  "commands":      { label: "Komutlar", focus: "Her kart bir komut grubu: temel komutlar, ileri komutlar, bayraklar/parametreler, gercek ornek kullanim — sozdizimi + ne ise yaradigi" },
+  "mistakes":      { label: "Sik Hatalar", focus: "Her madde HATA -> SEBEP -> COZUM yapisinda; gercek hata mesajlari ve somut duzeltmeler" },
+  "best-practices":{ label: "Best Practices", focus: "Yapilmasi gerekenler (DO) ve kacinilmasi gerekenler (DON'T) ikili kartlarla; her biri somut gerekceyle" },
+  "quick-reference":{ label: "Hizli Referans", focus: "Kisa tanim · komut · parametre · kullanim ornegi; yogun, tarama-dostu referans kartlari" },
+  "tool-summary":  { label: "Arac / Kutuphane Ozeti", focus: "Ne ise yarar · kurulum · cekirdek API/komutlar · tipik kullanim · entegrasyonlar · alternatifler · resmi link" },
+  "roadmap":       { label: "Yol Haritasi", focus: "Asama asama ogrenme/uygulama yolu: her kart bir asama (hedef, ne ogrenilir, pratik, cikti)" },
+};
+
+export const CHEATSHEET_SYSTEM = `Sen yazilim/teknik konularda YOGUN, REFERANS amacli "cheatsheet" (hizli basvuru karti) serileri tasarlayan bir uzmansin.
+Cikti carousel'den FARKLI: pazarlama dili YOK, girizgah YOK. Her kart TARAMA-DOSTU, dolu ve OGRETICI bir referans panosudur.
+Sana web arama araci verildi: komut/surum/parametre/link gibi her olguyu GERCEK kaynaktan dogrula; UYDURMA.
+
+# Tipografi isaretleri (her metin alaninda)
+- *kelime* -> kalin · _kelime_ -> kirmizi vurgu · \`kod\` -> kod/komut rozeti (\`npm i\`, \`/komut\`, \`config.json\`)
+
+# Ikonlar
+- "icon" alanina uygun tek EMOJI. Bilinen marka/arac ise ek olarak "logo" alanina Simple Icons slug (github, docker, react...).
+
+# Cikti SADECE gecerli JSON (markdown/aciklama YOK). Sema carousel ile AYNI; ek olarak 2 yeni blok tipi var:
+{
+  "slides": [
+    { "type":"cover", "title":"KONU + _TUR_ CHEATSHEET", "subtitle":"KISA VAAT · N BOLUM" },
+    { "type":"step", "step":"BOLUM 01", "bignum":"01", "page":"2/TOPLAM",
+      "title":"Net Alt Baslik",
+      "intro":"(kisa) 1 cumlelik aciklama",
+      "blocks":[ ...1-2 blok... ],
+      "callout":"Pratik uyari veya ozet (15-25 kelime)." }
+  ]
+}
+
+# Blok tipleri (carousel'den 5 + cheatsheet'e ozel 2):
+1) bullets: {"type":"bullets","items":["*madde*: aciklama · \`komut\`", ...]}  (3-5 madde, tam cumle)
+2) code: {"type":"code","text":"npm i -g x  ->  x init  ->  x run"}  (oklar icin -> ; cok satirli liste de olur)
+3) grid: {"type":"grid","cards":[{"label":"ETIKET","icon":"⚡","title":"Baslik","desc":"2 kisa cumle","highlight":false}, ...]} (2 veya 4)
+4) iconrows: {"type":"iconrows","rows":[{"icon":"📁","title":"Baslik","sub":"\`monospace alt satir\`"}, ...]}
+5) filecards: {"type":"filecards","cards":[{"icon":"👤","file":"dosya.md","desc":"...","tagsLabel":"Etiket:","tags":["a","b"]}, ...]}
+6) comptable (KARSILASTIRMA icin ideal): {"type":"comptable","columns":["Secenek A","Secenek B","Secenek C"],"rows":[{"label":"Kurulum","cells":["~15 dk","sifir","~10 dk"]}, ...]}  (2-3 kolon, 3-7 satir)
+7) qref (HIZLI REFERANS/KOMUT icin ideal): {"type":"qref","items":[{"icon":"🔍","title":"ETIKET","code":"komut --flag","desc":"ne ise yarar"}, ...]}  (4-8 oge, kompakt kutucuklar)
+
+# YOGUNLUK (cheatsheet DOLU olmali)
+- Her kart ~80-120 kelime bilgi tasisin; bos alan birakma. Kisa ama BILGI YUKLU yaz.
+- Yazilim/CLI ise GERCEK komutlari kullan (code/qref blogunda). Uydurma komut/surum/parametre YASAK.
+- comptable hucrelerinde kisa, kiyaslanabilir deger yaz (sayfa basina 2-4 kelime).
+
+# Kurallar
+- Kapak + N bolum. page = "X/TOPLAM" (kapak haric; bolumler 2'den baslar). bignum = "01"...
+- Baslik 2-4 kelime, net. Genel/klise baslik YASAK ("X Nedir", "Sonuc", "Avantajlar").
+- callout her bolumde pratik bir uyari/ozet olsun.`;
+
 // Brifi karta donusturen kullanici talimati. Hem OpenRouter hem Codex ayni kurallari kullanir.
 // brief: arastirma metni (OpenRouter) veya self-research direktifi (Codex).
 export function buildUserMsg({ topic, steps, total, langName, brief }) {
@@ -114,6 +170,32 @@ ZORUNLU:
 - Brifte olmayan komut/surum/fiyati UYDURMA. Emin degilsen o detayi atla.
 - Link/site verirken YALNIZCA brifteki RESMI_KAYNAK alan adini kullan. Yanlis firma/alakasiz site (or. Claude Code icin OpenAI) ASLA verme.
 - Kapak subtitle'inda "${steps}" sayisini kullan.`;
+}
+
+// Cheatsheet brifini karta donusturen kullanici talimati (kategoriye gore).
+export function buildCheatsheetUserMsg({ topic, steps, total, langName, brief, cheatsheetType }) {
+  const cat = CHEATSHEET_TYPES[cheatsheetType] || CHEATSHEET_TYPES["101"];
+  return `KONU: ${topic}
+CHEATSHEET TURU: ${cat.label}
+BUGUN: ${TODAY} — Komut/surum/parametre GUNCEL olmali; eskimis bilgi verme.
+BOLUM SAYISI: ${steps} (kapak haric) · TOPLAM SLAYT: ${total} · page = "X/${total}" (kapak haric)
+DIL: TUM metinleri "${langName}" dilinde yaz (tipografi isaretleri * _ \` aynen kalsin).
+
+BU TURUN KART AKISI (bolumleri bu basliklara/mantiga gore dagit):
+${cat.focus}
+
+ASAGIDAKI ARASTIRMA BRIFINI KULLAN — kartlar bu SOMUT bilgilere dayanmali:
+"""
+${brief || "(brief yok — yine de konuya OZGU, gercek ve dogru bilgi ver; uydurma)"}
+"""
+
+CHEATSHEET KURALLARI:
+- Kapak: title = "${topic} · ${cat.label}", subtitle = kisa vaat + "${steps} BOLUM".
+- Her bolum NET bir alt baslik + kisa intro + 1-2 blok + pratik callout.
+- Blok tipini ICERIGE gore sec; KARSILASTIRMA turunde \`comptable\` kullan; HIZLI REFERANS/KOMUTLAR turunde \`qref\` veya \`code\` kullan.
+- Yazilim/arac/CLI ise GERCEK kurulum + komutlari ver (resmi kaynaktan). Uydurma komut/surum/fiyat/link YASAK; emin degilsen atla.
+- Pazarlama dili, girizgah, "rozet/modul/sertifika" YASAK. Yogun, tarama-dostu, uygulanabilir bilgi ver.
+- Link/site verirken brifteki RESMI_KAYNAK alan adini kullan; alakasiz site verme.`;
 }
 
 async function callOR({ apiKey, model, messages, web, json, max_results = 6 }) {
@@ -239,7 +321,7 @@ function extractJson(raw) {
   return null;
 }
 
-const BLOCK_TYPES = new Set(["bullets", "code", "grid", "iconrows", "filecards"]);
+const BLOCK_TYPES = new Set(["bullets", "code", "grid", "iconrows", "filecards", "comptable", "qref"]);
 
 // Slayt dizisini DOGRULA: yapisal hatalari topla (render'i patlatacak seyler).
 // Donus: { ok, errors[] }. Bos/eksik degil, TIP hatalarina odaklanir.
@@ -256,6 +338,8 @@ function validateSlides(slides) {
       if ((b.type === "grid" || b.type === "filecards") && !Array.isArray(b.cards)) errors.push(`slide[${i}] ${b.type}.cards dizi degil`);
       if (b.type === "iconrows" && !Array.isArray(b.rows)) errors.push(`slide[${i}] iconrows.rows dizi degil`);
       if (b.type === "code" && typeof b.text !== "string") errors.push(`slide[${i}] code.text string degil`);
+      if (b.type === "comptable" && (!Array.isArray(b.columns) || !Array.isArray(b.rows))) errors.push(`slide[${i}] comptable.columns/rows dizi degil`);
+      if (b.type === "qref" && !Array.isArray(b.items)) errors.push(`slide[${i}] qref.items dizi degil`);
     }
   });
   return { ok: errors.length === 0, errors };
@@ -303,7 +387,7 @@ Cikti SADECE gecerli JSON: { "slides": [...] } (ayni sema).`;
   return parsed && Array.isArray(parsed.slides) ? parsed.slides : null;
 }
 
-export async function generateSlides({ topic, steps = 8, apiKey, model, researchModel, web = true, lang = "tr", deep = false, verify = true, onProgress }) {
+export async function generateSlides({ topic, steps = 8, apiKey, model, researchModel, web = true, lang = "tr", deep = false, verify = true, mode = "carousel", cheatsheetType = "101", onProgress }) {
   apiKey = apiKey || process.env.OPENROUTER_API_KEY;
   let MODEL = model || process.env.OR_MODEL || DEFAULT_MODEL;
   if (!apiKey) throw new Error("OpenRouter API anahtari ayarli degil. Ayarlar bolumunden ekleyin.");
@@ -338,8 +422,12 @@ export async function generateSlides({ topic, steps = 8, apiKey, model, research
 
   // 3) Brifi karta donustur (genel iskelet ve uydurma YASAK)
   emit("writing");
-  const userMsg = buildUserMsg({ topic, steps, total, langName, brief });
-  const baseMessages = [{ role: "system", content: SYSTEM }, { role: "user", content: userMsg }];
+  const isCheat = mode === "cheatsheet";
+  const sysPrompt = isCheat ? CHEATSHEET_SYSTEM : SYSTEM;
+  const userMsg = isCheat
+    ? buildCheatsheetUserMsg({ topic, steps, total, langName, brief, cheatsheetType })
+    : buildUserMsg({ topic, steps, total, langName, brief });
+  const baseMessages = [{ role: "system", content: sysPrompt }, { role: "user", content: userMsg }];
 
   const raw = await callOR({ apiKey, model: MODEL, json: true, messages: baseMessages });
   let parsed = extractJson(raw);
@@ -351,7 +439,7 @@ export async function generateSlides({ topic, steps = 8, apiKey, model, research
     emit("repair", { errors: check.errors.slice(0, 5) });
     const repairMsg = `Onceki JSON ciktisi gecersiz/eksikti. Sorunlar:\n- ${check.errors.join("\n- ")}\n\n` +
       `AYNI semaya birebir uyan, GECERLI JSON'u bastan ver (sadece JSON, aciklama yok). ` +
-      `slides dizisi olmali; her slide.title string; blok tipleri yalniz: bullets/code/grid/iconrows/filecards.`;
+      `slides dizisi olmali; her slide.title string; blok tipleri yalniz: bullets/code/grid/iconrows/filecards/comptable/qref.`;
     const raw2 = await callOR({
       apiKey, model: MODEL, json: true,
       messages: [...baseMessages, { role: "assistant", content: (raw || "").slice(0, 4000) }, { role: "user", content: repairMsg }],
