@@ -216,12 +216,18 @@ default portrait). Portrait output uses a 1080×1350 social-poster frame and a c
 3-column masonry layout; landscape uses 4 columns. Content is auto-scaled to fit the page
 and short decks are cropped to avoid empty bottom space.
 
-Valid `--cheatsheet-type` values: `usage-guide · comparison · install-guide · 101 ·
-commands · mistakes · best-practices · quick-reference · tool-summary · roadmap`
+Valid `--cheatsheet-type` values: `usage-guide · comparison · comparison-matrix ·
+install-guide · 101 · commands · mistakes · best-practices · quick-reference ·
+tool-summary · roadmap`
 (default `101`). In the **web UI**, choose **Content type → Cheatsheet**, then pick a
 **Cheatsheet type**; the `cheatsheet` template is auto-selected and the step count is set
 to 12 for the reference-poster layout. Generated cheatsheet sets are
 stored like any other set (with `type = 'cheatsheet'`) and flagged with a 📋 badge in the Library.
+
+Use `comparison-matrix` when the topic names several tools or products, for example
+`"Cursor vs Windsurf vs Claude Code vs Copilot"`. The generated poster uses `comptable`
+blocks where each compared item becomes a table column and each row is a feature or
+decision criterion.
 
 Render a ready-made cheatsheet sample (no API credits):
 

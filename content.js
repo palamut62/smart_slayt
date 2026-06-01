@@ -78,6 +78,7 @@ export const LANGS = {
 export const CHEATSHEET_TYPES = {
   "usage-guide":   { label: "Kullanim Kilavuzu", focus: "Nedir? · Ne zaman kullanilir? · Temel arayuz/kavramlar · Ilk kullanim akisi · Ayarlar · Ipuclari · Sik hata · Mini ornek" },
   "comparison":    { label: "Karsilastirma", focus: "Secenekler · Artilar/eksiler · Kim hangisini secmeli? · Performans/maliyet/ogrenme egrisi · Ornek senaryo · Son karar matrisi" },
+  "comparison-matrix": { label: "Karsilastirma Tablosu", focus: "Verilen araclari/konulari dogrudan karsilastir: her bolum bir ozellik ailesi, her blok tek bir tablo; tablo sutunlari karsilastirilan araclar, satirlar ozellik/kriterler" },
   "install-guide": { label: "Nasil Kurulur", focus: "Gereksinimler · Indirme/kurulum komutu · Ilk calistirma · Konfigurasyon · Dogrulama testi · Sik kurulum hatalari · Kaldirma/guncelleme" },
   "101":           { label: "101 / Baslangic Rehberi", focus: "Basit tanim · Temel kavramlar · Nerede kullanilir? · Ilk ornek · Ogrenme sirasi · Mini pratik · Sik hata · Sonraki adimlar" },
   "commands":      { label: "Komutlar", focus: "Her kart bir komut grubu: temel komutlar, ileri komutlar, bayraklar/parametreler, gercek ornek kullanim — sozdizimi + ne ise yaradigi" },
@@ -123,7 +124,7 @@ Sana web arama araci verildi: komut/surum/parametre/link gibi her olguyu GERCEK 
 3) grid: {"type":"grid","cards":[{"label":"ETIKET","icon":"⚡","title":"Baslik","desc":"2 kisa cumle","highlight":false}, ...]} (2 veya 4)
 4) iconrows: {"type":"iconrows","rows":[{"icon":"📁","title":"Baslik","sub":"\`monospace alt satir\`"}, ...]}
 5) filecards: {"type":"filecards","cards":[{"icon":"👤","file":"dosya.md","desc":"...","tagsLabel":"Etiket:","tags":["a","b"]}, ...]}
-6) comptable (KARSILASTIRMA icin ideal): {"type":"comptable","columns":["Secenek A","Secenek B","Secenek C"],"rows":[{"label":"Kurulum","cells":["~15 dk","sifir","~10 dk"]}, ...]}  (2-3 kolon, 3-7 satir)
+6) comptable (KARSILASTIRMA icin ideal): {"type":"comptable","columns":["Secenek A","Secenek B","Secenek C"],"rows":[{"label":"Kurulum","cells":["~15 dk","sifir","~10 dk"]}, ...]}  (2-6 karsilastirma kolonu, 3-7 satir)
 7) qref (HIZLI REFERANS/KOMUT icin ideal): {"type":"qref","items":[{"icon":"🔍","title":"ETIKET","code":"komut --flag","desc":"ne ise yarar"}, ...]}  (4-8 oge, kompakt kutucuklar)
 
 # YOGUNLUK (cheatsheet DOLU olmali)
@@ -182,6 +183,16 @@ ZORUNLU:
 // Cheatsheet brifini karta donusturen kullanici talimati (kategoriye gore).
 export function buildCheatsheetUserMsg({ topic, steps, total, langName, brief, cheatsheetType }) {
   const cat = CHEATSHEET_TYPES[cheatsheetType] || CHEATSHEET_TYPES["101"];
+  const matrixRules = cheatsheetType === "comparison-matrix" ? `
+
+KARSILASTIRMA TABLOSU ZORUNLU KURALLARI:
+- Konu birden fazla arac/urun/konu iceriyorsa (virgul, "vs", "/", "ile" vb.), karsilastirilacak elemanlari aynen cikar ve HER tabloda \`columns\` olarak kullan.
+- Konu tek bir arac gibi verilirse, resmi/gercek 2-5 ana alternatifi arastirip ayni tabloda karsilastir.
+- Her bolumde ana blok MUTLAKA \`comptable\` olsun; \`columns\` dizisi karsilastirilan eleman sayisi kadar olsun (ideal 3-5, en fazla 6).
+- Her \`row.label\` bir ozellik/kriter olsun: Kurulum, lisans/fiyat, platform, performans, ogrenme egrisi, entegrasyon, ekip icin uygunluk, kisitlar gibi.
+- Her \`row.cells\` uzunlugu \`columns\` ile AYNI olsun. Hucreler 1-4 kelimelik kisa, kiyaslanabilir degerler olmali; paragraf yazma.
+- Bolumler farkli kriter ailelerini kapsasin: "Kurulum", "Uretkenlik", "Ekip", "Maliyet", "Guvenlik", "Ekosistem", "Kisitlar", "Son Karar" gibi.
+- Callout her bolumde kimin hangi secenegi secmesi gerektigini kisa soylesin.` : "";
   return `KONU: ${topic}
 CHEATSHEET TURU: ${cat.label}
 BUGUN: ${TODAY} — Komut/surum/parametre GUNCEL olmali; eskimis bilgi verme.
@@ -190,6 +201,7 @@ DIL: TUM metinleri "${langName}" dilinde yaz (tipografi isaretleri * _ \` aynen 
 
 BU TURUN KART AKISI (bolumleri bu basliklara/mantiga gore dagit):
 ${cat.focus}
+${matrixRules}
 
 ASAGIDAKI ARASTIRMA BRIFINI KULLAN — kartlar bu SOMUT bilgilere dayanmali:
 """
@@ -201,7 +213,7 @@ CHEATSHEET KURALLARI:
 - Bolum basliklari ust kategori satirinda gorunecek; 2-4 kelime, birbirinden ayirt edilebilir ve sirali akisa uygun olsun.
 - Kapak: title = "${topic} · ${cat.label}", subtitle = kisa vaat + "${steps} BOLUM".
 - Her bolum NET bir alt baslik + kisa intro + 1-2 blok + pratik callout.
-- Blok tipini ICERIGE gore sec; KARSILASTIRMA turunde \`comptable\` kullan; HIZLI REFERANS/KOMUTLAR turunde \`qref\` veya \`code\` kullan.
+- Blok tipini ICERIGE gore sec; KARSILASTIRMA turlerinde \`comptable\` kullan; HIZLI REFERANS/KOMUTLAR turunde \`qref\` veya \`code\` kullan.
 - Yazilim/arac/CLI ise GERCEK kurulum + komutlari ver (resmi kaynaktan). Uydurma komut/surum/fiyat/link YASAK; emin degilsen atla.
 - Pazarlama dili, girizgah, "rozet/modul/sertifika" YASAK. Yogun, tarama-dostu, uygulanabilir bilgi ver.
 - Link/site verirken brifteki RESMI_KAYNAK alan adini kullan; alakasiz site verme.`;

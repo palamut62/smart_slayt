@@ -257,6 +257,7 @@
           <select id="cheatType" onchange="onCheatType()">
             <option value="usage-guide" data-i18n="cs_usage">📖 Kullanım Kılavuzu</option>
             <option value="comparison" data-i18n="cs_comparison">⚖️ Karşılaştırma</option>
+            <option value="comparison-matrix" data-i18n="cs_matrix">📊 Karşılaştırma Tablosu</option>
             <option value="install-guide" data-i18n="cs_install">⚙️ Nasıl Kurulur</option>
             <option value="101" selected data-i18n="cs_101">🎓 101 / Başlangıç Rehberi</option>
             <option value="commands" data-i18n="cs_commands">⌨️ Komutlar</option>
@@ -513,7 +514,7 @@ const I18N={
   f_lang:`Dil`, f_steps:`Adim sayisi`, f_template:`Sablon (template)`, f_palette:`Renk paleti`,
   f_ctype:`İçerik türü`, f_cheattype:`Cheatsheet türü`,
   ct_carousel:`🎠 Carousel / Bilgi Kartı`, ct_cheatsheet:`📋 Cheatsheet`,
-  cs_usage:`📖 Kullanım Kılavuzu`, cs_comparison:`⚖️ Karşılaştırma`, cs_install:`⚙️ Nasıl Kurulur`,
+  cs_usage:`📖 Kullanım Kılavuzu`, cs_comparison:`⚖️ Karşılaştırma`, cs_matrix:`📊 Karşılaştırma Tablosu`, cs_install:`⚙️ Nasıl Kurulur`,
   cs_101:`🎓 101 / Başlangıç Rehberi`, cs_commands:`⌨️ Komutlar`, cs_mistakes:`⚠️ Sık Hatalar`,
   cs_best:`✅ Best Practices`, cs_quick:`⚡ Hızlı Referans`, cs_tool:`🧰 Araç / Kütüphane Özeti`, cs_roadmap:`🗺️ Yol Haritası`,
   f_orient:`Sayfa yönü`, or_portrait:`📄 Dikey · A4`, or_landscape:`🖼️ Yatay · A4`,
@@ -601,7 +602,7 @@ const I18N={
   f_lang:`Language`, f_steps:`Step count`, f_template:`Template`, f_palette:`Color palette`,
   f_ctype:`Content type`, f_cheattype:`Cheatsheet type`,
   ct_carousel:`🎠 Carousel / Info Cards`, ct_cheatsheet:`📋 Cheatsheet`,
-  cs_usage:`📖 Usage Guide`, cs_comparison:`⚖️ Comparison`, cs_install:`⚙️ How to Install`,
+  cs_usage:`📖 Usage Guide`, cs_comparison:`⚖️ Comparison`, cs_matrix:`📊 Comparison Matrix`, cs_install:`⚙️ How to Install`,
   cs_101:`🎓 101 / Getting Started`, cs_commands:`⌨️ Commands`, cs_mistakes:`⚠️ Common Mistakes`,
   cs_best:`✅ Best Practices`, cs_quick:`⚡ Quick Reference`, cs_tool:`🧰 Tool / Library Summary`, cs_roadmap:`🗺️ Roadmap`,
   f_orient:`Page orientation`, or_portrait:`📄 Portrait · A4`, or_landscape:`🖼️ Landscape · A4`,
@@ -1034,7 +1035,7 @@ function pickTpl(k){_template=k;renderTpls();}
 renderTpls();
 
 // Cheatsheet kategorisi -> onerilen bolum sayisi (kategori akisindaki alt-baslik sayisina yakin).
-const CHEAT_STEPS={'usage-guide':12,'comparison':12,'install-guide':12,'101':12,'commands':12,'mistakes':12,'best-practices':12,'quick-reference':12,'tool-summary':12,'roadmap':12};
+const CHEAT_STEPS={'usage-guide':12,'comparison':12,'comparison-matrix':12,'install-guide':12,'101':12,'commands':12,'mistakes':12,'best-practices':12,'quick-reference':12,'tool-summary':12,'roadmap':12};
 // İçerik türü degisince: cheatsheet tur secimini goster/gizle, sablonu ve adim sayisini onerile uyarla.
 let _tplBeforeCheat=null, _stepsBeforeCheat=null;
 function onContentType(){

@@ -171,6 +171,9 @@
   .poster .qref .qbox{padding:7px 8px;gap:4px;border-radius:7px;}
   .poster .qref .qhead{font-size:14.5px;} .poster .qref .qcode{font-size:11.5px;padding:3px 6px;} .poster .qref .qdesc{font-size:12.5px;line-height:1.18;}
   .poster .comptable{min-width:0;} .poster .comptable .ccell{font-size:11.5px;padding:6px 7px;}
+  .poster .comptable.cols-4 .ccell{font-size:10.5px;padding:5px 6px;}
+  .poster .comptable.cols-5 .ccell,.poster .comptable.cols-6 .ccell{font-size:9.5px;padding:4px 5px;line-height:1.15;}
+  .poster .comptable.cols-5 .clabel,.poster .comptable.cols-6 .clabel{font-size:9px;}
 
   /* ===== CHEATSHEET STIL VARYANTLARI (template olarak secilebilir) ===== */
   /* (varsayilan) "paper": yukaridaki renkli serif referans stili */
@@ -383,10 +386,12 @@
       }
       if(b.type==='comptable'){
         const cols=b.columns||[]; const n=cols.length+1; // ilk kolon satir etiketi
-        const tmpl=`grid-template-columns:minmax(0,0.8fr) repeat(${cols.length},minmax(0,1fr));`;
+        const cls='cols-'+Math.max(1,Math.min(6,cols.length));
+        const labelFr=cols.length>=5?'0.72fr':(cols.length>=4?'0.78fr':'0.85fr');
+        const tmpl=`grid-template-columns:minmax(0,${labelFr}) repeat(${cols.length},minmax(0,1fr));`;
         const head=`<div class="crow chead" style="${tmpl}"><div class="ccell"></div>${cols.map(c=>`<div class="ccell">${esc(c)}</div>`).join('')}</div>`;
         const rows=(b.rows||[]).map(r=>`<div class="crow" style="${tmpl}"><div class="ccell clabel">${fmt(r.label||'')}</div>${(r.cells||[]).map(cell=>`<div class="ccell">${fmt(cell)}</div>`).join('')}</div>`).join('');
-        return `<div class="comptable">${head}${rows}</div>`;
+        return `<div class="comptable ${cls}">${head}${rows}</div>`;
       }
       if(b.type==='qref'){
         return `<div class="qref">${(b.items||[]).map(it=>`
