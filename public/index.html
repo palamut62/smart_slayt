@@ -267,11 +267,20 @@
             <option value="roadmap" data-i18n="cs_roadmap">🗺️ Yol Haritası</option>
           </select></div>
       </div>
-      <div class="field" id="orientField" style="display:none"><label data-i18n="f_orient">Sayfa yönü (tek sayfa cheatsheet)</label>
-        <select id="orient">
-          <option value="portrait" data-i18n="or_portrait">📄 Dikey · A4</option>
-          <option value="landscape" data-i18n="or_landscape">🖼️ Yatay · A4</option>
-        </select></div>
+      <div class="grid2" id="cheatStyleRow" style="grid-template-columns:1fr 1fr;margin-top:20px;display:none">
+        <div class="field" id="orientField" style="margin:0"><label data-i18n="f_orient">Sayfa yönü</label>
+          <select id="orient">
+            <option value="portrait" data-i18n="or_portrait">📄 Dikey · A4</option>
+            <option value="landscape" data-i18n="or_landscape">🖼️ Yatay · A4</option>
+          </select></div>
+        <div class="field" style="margin:0"><label data-i18n="f_cstyle">Cheatsheet stili (format)</label>
+          <select id="cheatStyle">
+            <option value="paper" data-i18n="csty_paper">🎨 Renkli Referans</option>
+            <option value="tab" data-i18n="csty_tab">🏷️ Etiketli (renkli başlık)</option>
+            <option value="notebook" data-i18n="csty_notebook">📓 Defter (el yazısı)</option>
+            <option value="mono" data-i18n="csty_mono">⌨️ Sade / Teknik</option>
+          </select></div>
+      </div>
       <div class="grid2" style="grid-template-columns:1fr 1fr;margin-top:20px">
         <div class="field" style="margin:0"><label data-i18n="f_lang">Dil</label>
           <select id="lang">
@@ -507,7 +516,8 @@ const I18N={
   cs_usage:`📖 Kullanım Kılavuzu`, cs_comparison:`⚖️ Karşılaştırma`, cs_install:`⚙️ Nasıl Kurulur`,
   cs_101:`🎓 101 / Başlangıç Rehberi`, cs_commands:`⌨️ Komutlar`, cs_mistakes:`⚠️ Sık Hatalar`,
   cs_best:`✅ Best Practices`, cs_quick:`⚡ Hızlı Referans`, cs_tool:`🧰 Araç / Kütüphane Özeti`, cs_roadmap:`🗺️ Yol Haritası`,
-  f_orient:`Sayfa yönü (tek sayfa cheatsheet)`, or_portrait:`📄 Dikey · A4`, or_landscape:`🖼️ Yatay · A4`,
+  f_orient:`Sayfa yönü`, or_portrait:`📄 Dikey · A4`, or_landscape:`🖼️ Yatay · A4`,
+  f_cstyle:`Cheatsheet stili (format)`, csty_paper:`🎨 Renkli Referans`, csty_tab:`🏷️ Etiketli (renkli başlık)`, csty_notebook:`📓 Defter (el yazısı)`, csty_mono:`⌨️ Sade / Teknik`,
   deep_label:`🔬 Derin araştırma <span style="color:var(--ink-soft);font-weight:400">— her başlık için ayrı web araştırması (daha kapsamlı, biraz yavaş)</span>`,
   btn_generate:`Kartlari Üret`, gen_hint:`web arastirmali · derin modda ~1-2 dk`,
   working_title:`Kartlar tasarlaniyor…`, working_sub:`Web arastiriliyor ve metinler yaziliyor`,
@@ -594,7 +604,8 @@ const I18N={
   cs_usage:`📖 Usage Guide`, cs_comparison:`⚖️ Comparison`, cs_install:`⚙️ How to Install`,
   cs_101:`🎓 101 / Getting Started`, cs_commands:`⌨️ Commands`, cs_mistakes:`⚠️ Common Mistakes`,
   cs_best:`✅ Best Practices`, cs_quick:`⚡ Quick Reference`, cs_tool:`🧰 Tool / Library Summary`, cs_roadmap:`🗺️ Roadmap`,
-  f_orient:`Page orientation (single-page cheatsheet)`, or_portrait:`📄 Portrait · A4`, or_landscape:`🖼️ Landscape · A4`,
+  f_orient:`Page orientation`, or_portrait:`📄 Portrait · A4`, or_landscape:`🖼️ Landscape · A4`,
+  f_cstyle:`Cheatsheet style (format)`, csty_paper:`🎨 Colorful Reference`, csty_tab:`🏷️ Tabbed (color header)`, csty_notebook:`📓 Notebook (handwritten)`, csty_mono:`⌨️ Clean / Technical`,
   deep_label:`🔬 Deep research <span style="color:var(--ink-soft);font-weight:400">— a separate web search per heading (more thorough, a bit slower)</span>`,
   btn_generate:`Generate Cards`, gen_hint:`web-researched · ~1-2 min in deep mode`,
   working_title:`Designing cards…`, working_sub:`Researching the web and writing copy`,
@@ -915,7 +926,8 @@ async function generate(){
     const mode=document.getElementById('contentType').value==='cheatsheet'?'cheatsheet':'carousel';
     const cheatsheetType=document.getElementById('cheatType').value;
     const orientation=document.getElementById('orient').value;
-    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,steps,lang,palette:_palette,template:_template,deep,mode,cheatsheetType,orientation})});
+    const cheatsheetStyle=document.getElementById('cheatStyle').value;
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic,steps,lang,palette:_palette,template:_template,deep,mode,cheatsheetType,orientation,cheatsheetStyle})});
     if(!r.ok && !r.body){const d=await r.json().catch(()=>({}));throw new Error(d.error||'Hata');}
     // NDJSON akisi: satir satir ilerleme olaylari, son satir done/error
     const reader=r.body.getReader(); const dec=new TextDecoder(); let buf='', d=null, errMsg=null;
@@ -1029,7 +1041,7 @@ function onContentType(){
   const ct=document.getElementById('contentType').value;
   const isCheat=ct==='cheatsheet';
   document.getElementById('cheatTypeField').style.display=isCheat?'block':'none';
-  const of=document.getElementById('orientField'); if(of)of.style.display=isCheat?'block':'none';
+  const of=document.getElementById('cheatStyleRow'); if(of)of.style.display=isCheat?'grid':'none';
   if(isCheat){
     if(_template!=='cheatsheet'){_tplBeforeCheat=_template;_template='cheatsheet';renderTpls();}
     if(_stepsBeforeCheat===null)_stepsBeforeCheat=document.getElementById('steps').value;

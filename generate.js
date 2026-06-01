@@ -20,6 +20,8 @@ async function main() {
   const mode = flag("--mode") === "cheatsheet" ? "cheatsheet" : "carousel";
   let cheatsheetType = flag("--cheatsheet-type") || "101";
   const orientation = flag("--orientation") === "landscape" ? "landscape" : "portrait";
+  const styleArg = flag("--cheatsheet-style") || "";
+  const variant = ["tab", "notebook", "mono"].includes(styleArg) ? styleArg : "";
   if (mode === "cheatsheet" && !CHEATSHEET_TYPES[cheatsheetType]) {
     console.error(`Gecersiz --cheatsheet-type "${cheatsheetType}". Gecerli: ${Object.keys(CHEATSHEET_TYPES).join(", ")}`);
     process.exit(1);
@@ -39,7 +41,7 @@ async function main() {
     console.log(`Icerik uretildi: ${slides.length} slayt -> last-content.json`);
   }
 
-  const files = await renderSlides(slides, resolve(__dirname, "out"), "kraft", mode === "cheatsheet" ? "cheatsheet" : "editorial", "tr", undefined, mode === "cheatsheet", orientation);
+  const files = await renderSlides(slides, resolve(__dirname, "out"), "kraft", mode === "cheatsheet" ? "cheatsheet" : "editorial", "tr", undefined, mode === "cheatsheet", orientation, variant);
   files.forEach((f) => console.log(`  ✓ ${f.file}`));
   console.log(`\nBitti. ${files.length} kart ./out klasorunde.`);
   process.exit(0);

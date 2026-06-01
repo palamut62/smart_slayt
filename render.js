@@ -20,7 +20,7 @@ export async function closeBrowser() {
 
 // slides -> [{name, file}] dondurur. outDir verilmezse ./out
 // onProgress(i, total): her slayt cekildikten sonra cagrilir (opsiyonel).
-export async function renderSlides(slides, outDir = resolve(__dirname, "out"), palette = "kraft", template = "editorial", lang = "tr", onProgress, single = false, orientation = "portrait") {
+export async function renderSlides(slides, outDir = resolve(__dirname, "out"), palette = "kraft", template = "editorial", lang = "tr", onProgress, single = false, orientation = "portrait", variant = "") {
   fs.mkdirSync(outDir, { recursive: true });
   const browser = await getBrowser();
   const page = await browser.newPage({ viewport: { width: 1080, height: 1350 }, deviceScaleFactor: 2 });
@@ -37,7 +37,7 @@ export async function renderSlides(slides, outDir = resolve(__dirname, "out"), p
     // TEK SAYFALIK CHEATSHEET (poster): tum bolumler tek uzun gorsele; element ekran goruntusu.
     if (single) {
       await page.evaluate(() => window.__setPoster && window.__setPoster());
-      await page.evaluate(({ d, o }) => window.__renderPoster(d, { orientation: o }), { d: slides, o: orientation });
+      await page.evaluate(({ d, o, v }) => window.__renderPoster(d, { orientation: o, variant: v }), { d: slides, o: orientation, v: variant });
       await page.evaluate(() => document.fonts.ready);
       await page.evaluate(() => window.__fitPoster && window.__fitPoster()); // fontlar yuklendikten sonra yeniden sigdir
       const el = await page.$(".poster");

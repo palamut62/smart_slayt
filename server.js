@@ -119,8 +119,10 @@ app.post("/api/codex/test", async (req, res) => {
 
 // --- Uretim (NDJSON akisi: ilerleme satirlari + son 'done'/'error' satiri) ---
 app.post("/api/generate", async (req, res) => {
-  const { topic, steps, lang, palette, template, deep, mode, cheatsheetType, orientation } = req.body || {};
+  const { topic, steps, lang, palette, template, deep, mode, cheatsheetType, orientation, cheatsheetStyle } = req.body || {};
   const orient = orientation === "landscape" ? "landscape" : "portrait";
+  const CHEAT_STYLES = ["paper", "tab", "notebook", "mono"];
+  const cstyle = CHEAT_STYLES.includes(cheatsheetStyle) && cheatsheetStyle !== "paper" ? cheatsheetStyle : "";
   const pal = PALETTES.includes(palette) ? palette : "kraft";
   const tpl = TEMPLATES.includes(template) ? template : "editorial";
   const lng = LANG_CODES.includes(lang) ? lang : "tr";
@@ -179,7 +181,7 @@ app.post("/api/generate", async (req, res) => {
     send({ type: "progress", stage: "logos" });
     await attachLogos(slides, setDir);          // konuyla ilgili logolari webden indir
     const files = await renderSlides(slides, setDir, pal, tpl, lng,
-      (done, tot) => send({ type: "progress", stage: "render", done, total: tot }), md === "cheatsheet", orient);
+      (done, tot) => send({ type: "progress", stage: "render", done, total: tot }), md === "cheatsheet", orient, cstyle);
     const cards = files.map((f) => ({ name: f.name, url: `/out/${stamp}/${f.name}` }));
     const modelLabel = usedProvider === "codex" ? `codex${cfg.codexModel ? " · " + cfg.codexModel : ""}` : cfg.model;
     const set = createSet({ topic: t, model: modelLabel, steps: n, slides, cards, type: md, cheatsheetType: cst });
