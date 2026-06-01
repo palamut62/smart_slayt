@@ -165,6 +165,7 @@
   .setcard:hover{transform:translateY(-2px);border-color:#c9a87f;}
   .setcard .strip{display:flex;gap:6px;flex:none;}
   .setcard .strip img{width:50px;height:62px;object-fit:cover;border-radius:7px;border:1px solid var(--line);}
+  img.phimg{object-fit:contain;background:var(--paper2);}
   .setcard .meta{flex:1;min-width:0;}
   .setcard .meta h3{font-family:'Fraunces',serif;font-weight:600;font-size:22px;line-height:1.15;margin-bottom:5px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -485,6 +486,9 @@
 <script>
 let configured=false;
 let _settings=null;
+// Gorsel dosyasi yoksa (or. out/ temizlenmisse) kirik ikon yerine nazik yer-tutucu goster.
+const __ph="data:image/svg+xml,"+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='216' height='270'><rect width='100%' height='100%' fill='%23ECDDC8'/><g fill='none' stroke='%23B5482E' stroke-width='4' opacity='.55'><rect x='58' y='86' width='100' height='80' rx='8'/><path d='M58 140l28-26 22 20 26-30 24 36'/></g><text x='108' y='210' font-family='Arial' font-size='18' fill='%238d7d6a' text-anchor='middle'>görsel yok</text></svg>`);
+function imgErr(el){el.onerror=null;el.src=__ph;el.classList.add('phimg');}
 
 // ===== i18n (TR/EN arayuz dili) =====
 let UILANG=localStorage.getItem('uilang')||'tr';
@@ -727,7 +731,7 @@ function buildCarousel(cards,mountId,zipId){
   _cz={cards,i:0,zipId};
   // Tek sayfalik cheatsheet posteri: uzun gorseli kirpmadan, tamamini goster.
   const single=cards.length===1;
-  const slides=cards.map((c,i)=>`<div class="slide"><img src="${c.url}" onclick="openLb(${i})"/></div>`).join('');
+  const slides=cards.map((c,i)=>`<div class="slide"><img src="${c.url}" onclick="openLb(${i})" onerror="imgErr(this)"/></div>`).join('');
   const dots=cards.map((_,i)=>`<div class="dot ${i===0?'active':''}" onclick="czGo(${i})"></div>`).join('');
   document.getElementById(mountId).innerHTML=`
     <div class="carousel">
@@ -957,7 +961,7 @@ async function loadLibrary(){
   const el=document.getElementById('setlist');
   if(!sets.length){el.innerHTML=`<div class="empty"><div class="big">✦</div><p>${t('empty_lib')}</p></div>`;return;}
   el.innerHTML=sets.map(s=>{
-    const strip=s.cards.slice(0,4).map(c=>`<img src="${c.url}"/>`).join('');
+    const strip=s.cards.slice(0,4).map(c=>`<img src="${c.url}" onerror="imgErr(this)"/>`).join('');
     return `<div class="setcard" onclick="openSet(${s.id})" style="cursor:pointer">
       <div class="strip">${strip}</div>
       <div class="meta"><h3>${s.type==='cheatsheet'?'📋 ':''}${s.topic}</h3>
