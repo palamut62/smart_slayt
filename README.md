@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="smart_slayt — AI Carousel & Cheatsheet Generator" width="100%" />
+</p>
+
 <h1 align="center">smart_slayt</h1>
 
 <p align="center">
