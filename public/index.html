@@ -241,7 +241,7 @@
             <option value="cheatsheet" data-i18n="ct_cheatsheet">📋 Cheatsheet</option>
           </select></div>
         <div class="field" id="cheatTypeField" style="margin:0;display:none"><label data-i18n="f_cheattype">Cheatsheet türü</label>
-          <select id="cheatType">
+          <select id="cheatType" onchange="onCheatType()">
             <option value="usage-guide" data-i18n="cs_usage">📖 Kullanım Kılavuzu</option>
             <option value="comparison" data-i18n="cs_comparison">⚖️ Karşılaştırma</option>
             <option value="install-guide" data-i18n="cs_install">⚙️ Nasıl Kurulur</option>
@@ -978,17 +978,28 @@ function renderTpls(){
 function pickTpl(k){_template=k;renderTpls();}
 renderTpls();
 
-// İçerik türü degisince: cheatsheet tur secimini goster/gizle, sablonu otomatik onerile uyarla.
-let _tplBeforeCheat=null;
+// Cheatsheet kategorisi -> onerilen bolum sayisi (kategori akisindaki alt-baslik sayisina yakin).
+const CHEAT_STEPS={'usage-guide':8,'comparison':6,'install-guide':7,'101':8,'commands':6,'mistakes':6,'best-practices':6,'quick-reference':7,'tool-summary':7,'roadmap':7};
+// İçerik türü degisince: cheatsheet tur secimini goster/gizle, sablonu ve adim sayisini onerile uyarla.
+let _tplBeforeCheat=null, _stepsBeforeCheat=null;
 function onContentType(){
   const ct=document.getElementById('contentType').value;
   const isCheat=ct==='cheatsheet';
   document.getElementById('cheatTypeField').style.display=isCheat?'block':'none';
   if(isCheat){
     if(_template!=='cheatsheet'){_tplBeforeCheat=_template;_template='cheatsheet';renderTpls();}
-  }else if(_template==='cheatsheet'){
-    _template=_tplBeforeCheat||'editorial';renderTpls();
+    if(_stepsBeforeCheat===null)_stepsBeforeCheat=document.getElementById('steps').value;
+    applyCheatSteps();
+  }else{
+    if(_template==='cheatsheet'){_template=_tplBeforeCheat||'editorial';renderTpls();}
+    if(_stepsBeforeCheat!==null){document.getElementById('steps').value=_stepsBeforeCheat;_stepsBeforeCheat=null;}
   }
+}
+// Cheatsheet turu degisince adim sayisini o kategorinin onerisine getir.
+function onCheatType(){ if(document.getElementById('contentType').value==='cheatsheet')applyCheatSteps(); }
+function applyCheatSteps(){
+  const ctype=document.getElementById('cheatType').value;
+  document.getElementById('steps').value=CHEAT_STEPS[ctype]||8;
 }
 
 // --- Tema (acik/koyu) ---
