@@ -119,7 +119,8 @@ app.post("/api/codex/test", async (req, res) => {
 
 // --- Uretim (NDJSON akisi: ilerleme satirlari + son 'done'/'error' satiri) ---
 app.post("/api/generate", async (req, res) => {
-  const { topic, steps, lang, palette, template, deep, mode, cheatsheetType } = req.body || {};
+  const { topic, steps, lang, palette, template, deep, mode, cheatsheetType, orientation } = req.body || {};
+  const orient = orientation === "landscape" ? "landscape" : "portrait";
   const pal = PALETTES.includes(palette) ? palette : "kraft";
   const tpl = TEMPLATES.includes(template) ? template : "editorial";
   const lng = LANG_CODES.includes(lang) ? lang : "tr";
@@ -130,6 +131,14 @@ app.post("/api/generate", async (req, res) => {
   res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
   res.setHeader("Cache-Control", "no-cache");
   const send = (obj) => { try { res.write(JSON.stringify(obj) + "\n"); } catch {} };
+
+  // Keepalive: uzun uretimlerde (ozellikle Codex, 1-4 dk) akista bayt akmazsa tarayici/proxy
+  // baglantiyi bos sayip kapatabilir -> istemci 'done' alamaz ("bos yanit"). Periyodik bos satir
+  // gonderip akisi canli tutar (istemci bos satirlari yok sayar).
+  const heartbeat = setInterval(() => { try { res.write("\n"); } catch {} }, 8000);
+  const stopHeartbeat = () => clearInterval(heartbeat);
+  res.on("close", stopHeartbeat);
+  res.on("finish", stopHeartbeat);
 
   try {
     if (!topic || !topic.trim()) { send({ type: "error", error: "Konu bos olamaz." }); return res.end(); }
@@ -170,7 +179,7 @@ app.post("/api/generate", async (req, res) => {
     send({ type: "progress", stage: "logos" });
     await attachLogos(slides, setDir);          // konuyla ilgili logolari webden indir
     const files = await renderSlides(slides, setDir, pal, tpl, lng,
-      (done, tot) => send({ type: "progress", stage: "render", done, total: tot }), md === "cheatsheet");
+      (done, tot) => send({ type: "progress", stage: "render", done, total: tot }), md === "cheatsheet", orient);
     const cards = files.map((f) => ({ name: f.name, url: `/out/${stamp}/${f.name}` }));
     const modelLabel = usedProvider === "codex" ? `codex${cfg.codexModel ? " · " + cfg.codexModel : ""}` : cfg.model;
     const set = createSet({ topic: t, model: modelLabel, steps: n, slides, cards, type: md, cheatsheetType: cst });

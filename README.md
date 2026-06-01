@@ -208,7 +208,11 @@ Add `--mode cheatsheet` and pick a category with `--cheatsheet-type`:
 ```bash
 node generate.js "React Hooks" 8 --mode cheatsheet --cheatsheet-type 101
 node generate.js "Docker" 8 --mode cheatsheet --cheatsheet-type install-guide
+node generate.js "Docker" 8 --mode cheatsheet --cheatsheet-type install-guide --orientation landscape
 ```
+
+The cheatsheet renders to a **fixed A4 page** (`--orientation portrait` | `landscape`,
+default portrait); content is auto-scaled to fit the single page.
 
 Valid `--cheatsheet-type` values: `usage-guide · comparison · install-guide · 101 ·
 commands · mistakes · best-practices · quick-reference · tool-summary · roadmap`
