@@ -60,6 +60,14 @@
   .topctrl .lng:hover{opacity:1;color:var(--ink);}
   .topctrl .lng.active{opacity:1;color:var(--rust);}
   .topctrl .lngsep{color:var(--ink-soft);opacity:.4;font-size:13px;}
+  /* global uretim gostergesi: tum sayfalarda gorunur, uretim arka planda surer */
+  .genchip{display:inline-flex;align-items:center;gap:8px;background:var(--rust);color:#fff;border:none;
+    padding:7px 14px;border-radius:20px;font-family:'Archivo';font-size:13px;font-weight:700;cursor:pointer;
+    box-shadow:0 8px 18px -8px var(--rust);transition:.18s;max-width:60vw;}
+  .genchip:hover{background:var(--rust-deep);transform:translateY(-1px);}
+  .genchip #genChipMsg{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .genchip .gcspin{width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
+    border-radius:50%;animation:spin 1s linear infinite;flex:none;}
   .theme-fab{width:auto;height:auto;border-radius:0;background:none;border:none;color:var(--ink-soft);font-size:17px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;box-shadow:none;transition:.18s;opacity:.6;padding:2px 4px;line-height:1;margin-left:2px;}
   .theme-fab:hover{opacity:1;color:var(--rust);transform:rotate(-12deg);}
@@ -210,6 +218,7 @@
 </head>
 <body>
 <div class="topctrl">
+  <button id="genChip" class="genchip" style="display:none" onclick="go('studio')" title="Üretim sürüyor — Stüdyo'ya dön"><span class="gcspin"></span><span id="genChipMsg">üretiliyor…</span></button>
   <button id="langFab" class="lng" onclick="toggleUILang()" title="Dil / Language">EN</button>
   <button id="themeFab" class="theme-fab" onclick="toggleTheme()" title="Açik/Koyu tema">🌙</button>
 </div>
@@ -876,16 +885,22 @@ async function testKey(){
 }
 
 // ---- Generate ----
+let _genBusy=false;
 async function generate(){
+  if(_genBusy){toast(UILANG==='en'?'A generation is already running…':'Zaten bir üretim sürüyor…');return;}
   if(_provider!=='codex' && !configured){toast(t('key_needed'),'err');go('settings');return;}
   const topic=document.getElementById('topic').value.trim();
   if(!topic){toast(t('topic_empty'),'err');return;}
   const steps=document.getElementById('steps').value;
   const lang=document.getElementById('lang').value;
   const btn=document.getElementById('genBtn');btn.disabled=true;
+  _genBusy=true;
   document.getElementById('working').classList.add('show');
   document.getElementById('result').innerHTML='';
+  // Global gosterge: uretim arka planda surer; baska sayfaya gecsen de devam eder.
+  const chip=document.getElementById('genChip'); if(chip)chip.style.display='inline-flex';
   const wm=document.getElementById('workmsg');
+  const setProg=(m)=>{ if(m){ if(wm)wm.textContent=m; const gcm=document.getElementById('genChipMsg'); if(gcm)gcm.textContent=m; } };
   const stageMsg=(ev)=>{
     const TR={start:'Hazirlaniyor…',research:'Web arastiriliyor (yeni/populer/ipucu)…',deep:`Derin arastirma (${ev.sections||''} baslik)…`,writing:'Metinler yaziliyor…',repair:'Cikti duzeltiliyor…',verify:'Bilgiler dogrulaniyor…',logos:'Logolar indiriliyor…',render:`Kartlar ciziliyor… ${ev.done||0}/${ev.total||''}`};
     const EN={start:'Preparing…',research:'Researching the web (new/popular/tips)…',deep:`Deep research (${ev.sections||''} topics)…`,writing:'Writing copy…',repair:'Fixing output…',verify:'Verifying facts…',logos:'Fetching logos…',render:`Rendering cards… ${ev.done||0}/${ev.total||''}`};
@@ -906,7 +921,7 @@ async function generate(){
       while((nl=buf.indexOf('\n'))>=0){
         const line=buf.slice(0,nl).trim(); buf=buf.slice(nl+1); if(!line)continue;
         let ev; try{ev=JSON.parse(line);}catch{continue;}
-        if(ev.type==='progress'){const m=stageMsg(ev); if(m&&wm)wm.textContent=m;}
+        if(ev.type==='progress'){setProg(stageMsg(ev));}
         else if(ev.type==='done')d=ev;
         else if(ev.type==='error')errMsg=ev.error;
       }
@@ -926,8 +941,14 @@ async function generate(){
       <p class="hint" style="text-align:center">${t('gen_saved_hint')}</p>`;
     buildCarousel(d.cards,'genCarousel',d.id);
     toast(d.count+' '+t('cards_word')+' '+t('gen_generated')+' · '+provLabel,'ok');
+    // Kullanici baska sayfadaysa kutuphaneyi tazele ki yeni seri hemen gorunsun.
+    if(document.getElementById('view-library').classList.contains('active'))loadLibrary();
   }catch(e){toast('Hata: '+e.message,'err');}
-  finally{btn.disabled=false;document.getElementById('working').classList.remove('show');}
+  finally{
+    _genBusy=false;btn.disabled=false;
+    document.getElementById('working').classList.remove('show');
+    const chip=document.getElementById('genChip'); if(chip)chip.style.display='none';
+  }
 }
 
 // ---- Library ----
