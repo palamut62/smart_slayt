@@ -136,6 +136,9 @@
   .track{display:flex;height:100%;transition:transform .4s cubic-bezier(.22,1,.36,1);}
   .track .slide{flex:0 0 100%;height:100%;}
   .track .slide img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;}
+  /* tek sayfalik cheatsheet posteri: uzun gorsel, kirpmadan tamami */
+  .viewport.poster{aspect-ratio:auto;width:440px;max-width:88vw;max-height:78vh;overflow-y:auto;}
+  .viewport.poster .track .slide img{height:auto;object-fit:contain;}
   .cnav{flex:none;width:54px;height:54px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);
     font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;box-shadow:var(--shadow);user-select:none;}
   .cnav:hover{background:var(--rust);color:#fff;border-color:var(--rust);transform:scale(1.06);}
@@ -706,17 +709,19 @@ function download(url,name){const a=document.createElement('a');a.href=url;a.dow
 let _cz={cards:[],i:0,zipId:null};
 function buildCarousel(cards,mountId,zipId){
   _cz={cards,i:0,zipId};
+  // Tek sayfalik cheatsheet posteri: uzun gorseli kirpmadan, tamamini goster.
+  const single=cards.length===1;
   const slides=cards.map((c,i)=>`<div class="slide"><img src="${c.url}" onclick="openLb(${i})"/></div>`).join('');
   const dots=cards.map((_,i)=>`<div class="dot ${i===0?'active':''}" onclick="czGo(${i})"></div>`).join('');
   document.getElementById(mountId).innerHTML=`
     <div class="carousel">
       <div class="stage">
-        <button class="cnav" id="czPrev" onclick="czStep(-1)">‹</button>
-        <div class="viewport"><div class="track" id="czTrack">${slides}</div></div>
-        <button class="cnav" id="czNext" onclick="czStep(1)">›</button>
+        ${single?'':'<button class="cnav" id="czPrev" onclick="czStep(-1)">‹</button>'}
+        <div class="viewport${single?' poster':''}"><div class="track" id="czTrack">${slides}</div></div>
+        ${single?'':'<button class="cnav" id="czNext" onclick="czStep(1)">›</button>'}
       </div>
-      <div class="counter" id="czCount">1 / ${cards.length}</div>
-      <div class="dots" id="czDots">${dots}</div>
+      ${single?'':`<div class="counter" id="czCount">1 / ${cards.length}</div>`}
+      ${single?'':`<div class="dots" id="czDots">${dots}</div>`}
       <div class="tools">
         <button class="btn sm" onclick="czDownloadCurrent()"><span>⬇</span> ${t('dl_card')}</button>
         ${zipId!=null?`<button class="btn dark sm" onclick="download('/api/sets/${zipId}/zip','seri-${zipId}.zip')"><span>⬇</span> ${t('dl_zip')}</button>`:''}
@@ -728,7 +733,7 @@ function buildCarousel(cards,mountId,zipId){
 function czUpdate(){
   const t=document.getElementById('czTrack'); if(!t)return;
   t.style.transform=`translateX(-${_cz.i*100}%)`;
-  document.getElementById('czCount').textContent=`${_cz.i+1} / ${_cz.cards.length}`;
+  const cc=document.getElementById('czCount'); if(cc)cc.textContent=`${_cz.i+1} / ${_cz.cards.length}`;
   document.querySelectorAll('#czDots .dot').forEach((d,i)=>d.classList.toggle('active',i===_cz.i));
   const p=document.getElementById('czPrev'),n=document.getElementById('czNext');
   if(p)p.disabled=_cz.i===0; if(n)n.disabled=_cz.i===_cz.cards.length-1;

@@ -38,7 +38,7 @@ async function main() {
     console.log(`Icerik uretildi: ${slides.length} slayt -> last-content.json`);
   }
 
-  const files = await renderSlides(slides, resolve(__dirname, "out"));
+  const files = await renderSlides(slides, resolve(__dirname, "out"), "kraft", mode === "cheatsheet" ? "cheatsheet" : "editorial", "tr", undefined, mode === "cheatsheet");
   files.forEach((f) => console.log(`  ✓ ${f.file}`));
   console.log(`\nBitti. ${files.length} kart ./out klasorunde.`);
   process.exit(0);

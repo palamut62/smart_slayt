@@ -20,7 +20,7 @@ export async function closeBrowser() {
 
 // slides -> [{name, file}] dondurur. outDir verilmezse ./out
 // onProgress(i, total): her slayt cekildikten sonra cagrilir (opsiyonel).
-export async function renderSlides(slides, outDir = resolve(__dirname, "out"), palette = "kraft", template = "editorial", lang = "tr", onProgress) {
+export async function renderSlides(slides, outDir = resolve(__dirname, "out"), palette = "kraft", template = "editorial", lang = "tr", onProgress, single = false) {
   fs.mkdirSync(outDir, { recursive: true });
   const browser = await getBrowser();
   const page = await browser.newPage({ viewport: { width: 1080, height: 1350 }, deviceScaleFactor: 2 });
@@ -33,6 +33,20 @@ export async function renderSlides(slides, outDir = resolve(__dirname, "out"), p
     await page.evaluate((p) => window.__setPalette(p), palette);
     await page.evaluate((t) => window.__setTemplate(t), template);
     await page.evaluate((l) => window.__setLang(l), lang);
+
+    // TEK SAYFALIK CHEATSHEET (poster): tum bolumler tek uzun gorsele; element ekran goruntusu.
+    if (single) {
+      await page.evaluate(() => window.__setPoster && window.__setPoster());
+      await page.evaluate((d) => window.__renderPoster(d), slides);
+      await page.evaluate(() => document.fonts.ready);
+      const el = await page.$(".poster");
+      const name = "cheatsheet.png";
+      const file = resolve(outDir, name);
+      await el.screenshot({ path: file });
+      results.push({ name, file });
+      if (onProgress) { try { onProgress(1, 1); } catch {} }
+      return results;
+    }
 
     for (let i = 0; i < slides.length; i++) {
       await page.evaluate((d) => window.__render(d), slides[i]);

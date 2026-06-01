@@ -170,7 +170,7 @@ app.post("/api/generate", async (req, res) => {
     send({ type: "progress", stage: "logos" });
     await attachLogos(slides, setDir);          // konuyla ilgili logolari webden indir
     const files = await renderSlides(slides, setDir, pal, tpl, lng,
-      (done, tot) => send({ type: "progress", stage: "render", done, total: tot }));
+      (done, tot) => send({ type: "progress", stage: "render", done, total: tot }), md === "cheatsheet");
     const cards = files.map((f) => ({ name: f.name, url: `/out/${stamp}/${f.name}` }));
     const modelLabel = usedProvider === "codex" ? `codex${cfg.codexModel ? " · " + cfg.codexModel : ""}` : cfg.model;
     const set = createSet({ topic: t, model: modelLabel, steps: n, slides, cards, type: md, cheatsheetType: cst });
