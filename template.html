@@ -455,6 +455,17 @@
       const secs=(deck||[]).filter(s=>s&&s!==cover);
       const few=secs.length<9?'few':'';
       const SP='<span class="poster-spark">✦</span>';
+      // Footer metni deck diline gore (sabit Turkce kalmasin).
+      const FOOT={
+        tr:'Bu rehberi faydali bulduysan <span class="acc">paylas</span> ✦ smart.slayt',
+        en:'If you found this guide helpful, <span class="acc">share</span> it ✦ smart.slayt',
+        de:'Wenn dir dieser Leitfaden gefallen hat, <span class="acc">teile</span> ihn ✦ smart.slayt',
+        es:'Si esta guia te resulto util, <span class="acc">compartela</span> ✦ smart.slayt',
+        fr:'Si ce guide vous a ete utile, <span class="acc">partagez</span>-le ✦ smart.slayt',
+        ar:'إذا وجدت هذا الدليل مفيدًا، <span class="acc">شاركه</span> ✦ smart.slayt',
+        ru:'Если это руководство было полезным, <span class="acc">поделитесь</span> ✦ smart.slayt',
+      };
+      const footHTML=FOOT[(window.__lang||'tr')]||FOOT.en;
       // alt baslik: referans gibi bolum basliklarinin nokta ile ayrilmis listesi
       const topics=secs.map(s=>(s.title||'').replace(/[*_`]/g,'').trim()).filter(Boolean).join(' <span class="dot">·</span> ');
       const cols=orient==='land'?4:3;
@@ -473,7 +484,7 @@
           <div class="poster-rule"></div>
         </div>
         <div class="poster-grid">${flow.map(sectionHTML).join('')}</div>
-        <div class="poster-foot">Bu rehberi faydali bulduysan <span class="acc">paylas</span> ✦ smart.slayt</div>
+        <div class="poster-foot">${footHTML}</div>
       </div></div>`;
       fitPoster();
     }
@@ -565,7 +576,7 @@
 
     // --- Dil (text-transform:uppercase locale'i icin) ---
     // lang="tr" iken "i" -> "İ" donusur; Ingilizce kelimeler bozulur. Deck diline gore ayarla.
-    function setLang(code){document.documentElement.lang=code||'en';}
+    function setLang(code){window.__lang=(code||'en');document.documentElement.lang=window.__lang;}
     window.__setLang=setLang;
   </script>
 </body>

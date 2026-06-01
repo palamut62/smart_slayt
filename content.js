@@ -211,7 +211,8 @@ ${brief || "(brief yok — yine de konuya OZGU, gercek ve dogru bilgi ver; uydur
 CHEATSHEET KURALLARI:
 - Poster sablonu referans gorselindeki gibi 3 sutun x 4 satir numarali panel hedefler. Mumkunse 12 bolum kullan; verilen bolum sayisi "${steps}" ise tam olarak o kadar bolum uret.
 - Bolum basliklari ust kategori satirinda gorunecek; 2-4 kelime, birbirinden ayirt edilebilir ve sirali akisa uygun olsun.
-- Kapak: title = "${topic} · ${cat.label}", subtitle = kisa vaat + "${steps} BOLUM".
+- Kapak: title = "${topic} · <KATEGORI>" — burada <KATEGORI> = "${cat.label}" ifadesinin "${langName}" diline CEVIRISI olsun (Turkce birakma). subtitle = kisa vaat + bolum sayisi; "BOLUM" kelimesini de "${langName}" diline cevir.
+- TUM kapak, baslik, alt baslik ve footer dahil HER metin "${langName}" dilinde olmali; hicbir Turkce kelime/etiket birakma.
 - Her bolum NET bir alt baslik + kisa intro + 1-2 blok + pratik callout.
 - Blok tipini ICERIGE gore sec; KARSILASTIRMA turlerinde \`comptable\` kullan; HIZLI REFERANS/KOMUTLAR turunde \`qref\` veya \`code\` kullan.
 - Yazilim/arac/CLI ise GERCEK kurulum + komutlari ver (resmi kaynaktan). Uydurma komut/surum/fiyat/link YASAK; emin degilsen atla.
